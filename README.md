@@ -1,1 +1,1 @@
-# Lynx App Template
+# Lynx DDD/Clean Template

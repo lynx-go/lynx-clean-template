@@ -81,16 +81,6 @@ tasks:
       - task: wire-cli
       - task: wire-tests
 
-  create-super-admin:
-    dir: '{{.USER_WORKING_DIR}}'
-    cmds:
-      - go run ./cmd/cli create-user -u admin -e admin@admin.com -p 11111111 --admin
-
-  gen-api-key:
-    dir: '{{.USER_WORKING_DIR}}'
-    cmds:
-      - go run ./cmd/cli gen-api-key -f
-
   generate:
     cmds:
       - task: generate:proto
