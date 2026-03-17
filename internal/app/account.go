@@ -194,7 +194,7 @@ func (uc *Account) CreateUser(ctx context.Context, req *apipb.SignUpRequest, isS
 	}
 
 	return &apipb.SignUpResponse{
-		UserInfo: converts.NewProtoUserFromUser(user),
+		UserInfo: NewProtoUserFromUser(user),
 	}, nil
 }
 

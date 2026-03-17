@@ -119,7 +119,7 @@ tasks:
   build-cli:
     dir: '{{.USER_WORKING_DIR}}'
     cmds:
-      - go build -ldflags "-X main.Version={{.VERSION}}" -o ./bin/skyline ./cmd/cli
+      - go build -ldflags "-X main.Version={{.VERSION}}" -o ./bin/lynx ./cmd/cli
     vars:
       VERSION:
         sh: git describe --tags --always
@@ -149,4 +149,4 @@ tasks:
       VERSION: 1.0.0
       TIMESTAMP:
         sh: '{{if eq .OS "Windows_NT"}}powershell -NoProfile -Command Get-Date -Format "yyyyMMddHHmmss"{{else}}date +%Y%m%d%H%M%S{{end}}'
-      DOCKER_IMAGE: 'skyline:{{.VERSION}}-{{.GIT_VERSION}}-{{.TIMESTAMP}}'
+      DOCKER_IMAGE: 'lynx:{{.VERSION}}-{{.GIT_VERSION}}-{{.TIMESTAMP}}'

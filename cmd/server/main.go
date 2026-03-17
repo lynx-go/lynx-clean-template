@@ -21,7 +21,7 @@ var (
 func main() {
 
 	o := lynx.NewOptions(
-		lynx.WithName("skyline-api"),
+		lynx.WithName("lynx-api"),
 		lynx.WithVersion(version),
 		lynx.WithSetFlagsFunc(func(f *pflag.FlagSet) {
 			f.String("config-dir", "./configs", "config file path")

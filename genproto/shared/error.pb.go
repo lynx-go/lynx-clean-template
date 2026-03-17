@@ -156,7 +156,7 @@ const file_shared_error_proto_rawDesc = "" +
 	"\x06params\x18\x04 \x01(\v2\x17.google.protobuf.StructR\x06params\x12\x18\n" +
 	"\adetails\x18\x05 \x03(\tR\adetails\"9\n" +
 	"\rErrorResponse\x12(\n" +
-	"\x05error\x18\x01 \x01(\v2\x12.lynx.shared.ErrorR\x05errorB?Z=github.com/lynx-go/lynx-clean-template/genproto/shared;sharedpbb\x06proto3"
+	"\x05error\x18\x01 \x01(\v2\x12.lynx.shared.ErrorR\x05errorBAZ?github.com/lynx-go/lynx-clean-template/genproto/shared;sharedpbb\x06proto3"
 
 var (
 	file_shared_error_proto_rawDescOnce sync.Once

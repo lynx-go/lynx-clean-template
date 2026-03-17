@@ -17,17 +17,18 @@ type APIKeyChecker interface {
 
 // APIKeyInterceptor validates X-API-Key header for developer API services
 type APIKeyInterceptor struct {
-	checker APIKeyChecker
+	checker    APIKeyChecker
+	pathPrefix string
 }
 
-func NewAPIKeyInterceptor(checker APIKeyChecker) *APIKeyInterceptor {
-	return &APIKeyInterceptor{checker: checker}
+func NewAPIKeyInterceptor(checker APIKeyChecker, pathPrefix string) *APIKeyInterceptor {
+	return &APIKeyInterceptor{checker: checker, pathPrefix: pathPrefix}
 }
 
 // UnaryAPIKeyMiddleware checks for valid API key in X-API-Key header for developer API services
 func (i *APIKeyInterceptor) UnaryAPIKeyMiddleware(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
 	// Only apply API key check to developer services
-	if !strings.HasPrefix(info.FullMethod, "/skyline.api.developer") {
+	if !strings.HasPrefix(info.FullMethod, i.pathPrefix) {
 		return handler(ctx, req)
 	}
 

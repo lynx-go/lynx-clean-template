@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	sharedpb "github.com/lynx-go/lynx-clean-template/genproto/shared"
 	"github.com/lynx-go/x/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

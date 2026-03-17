@@ -321,7 +321,7 @@ const file_shared_user_proto_rawDesc = "" +
 	"\x03bio\x18\x01 \x01(\tR\x03bio\x12\x12\n" +
 	"\x04urls\x18\x02 \x03(\tR\x04urls\x12\x1a\n" +
 	"\blanguage\x18\x03 \x01(\tR\blanguage\"\r\n" +
-	"\vAppMetadataB?Z=github.com/lynx-go/lynx-clean-template/genproto/shared;sharedpbb\x06proto3"
+	"\vAppMetadataBAZ?github.com/lynx-go/lynx-clean-template/genproto/shared;sharedpbb\x06proto3"
 
 var (
 	file_shared_user_proto_rawDescOnce sync.Once

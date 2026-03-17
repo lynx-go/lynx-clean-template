@@ -459,7 +459,7 @@ const file_api_v1_auth_proto_rawDesc = "" +
 	"\vAuthService\x12T\n" +
 	"\x05Token\x12\x19.lynx.api.v1.TokenRequest\x1a\x1a.lynx.api.v1.TokenResponse\"\x14\x82\xd3\xe4\x93\x02\x0e:\x01*\"\t/v1/token\x12X\n" +
 	"\x06SignUp\x12\x1a.lynx.api.v1.SignUpRequest\x1a\x1b.lynx.api.v1.SignUpResponse\"\x15\x82\xd3\xe4\x93\x02\x0f:\x01*\"\n" +
-	"/v1/signUpB<Z:github.com/lynx-go/lynx-clean-template/genproto/api/v1;apipbb\x06proto3"
+	"/v1/signUpB>Z<github.com/lynx-go/lynx-clean-template/genproto/api/v1;apipbb\x06proto3"
 
 var (
 	file_api_v1_auth_proto_rawDescOnce sync.Once

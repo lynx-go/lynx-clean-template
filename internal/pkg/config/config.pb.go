@@ -1261,22 +1261,22 @@ var File_config_proto protoreflect.FileDescriptor
 
 const file_config_proto_rawDesc = "" +
 	"\n" +
-	"\fconfig.proto\x12\x12skyline.api.config\"\xb4\x02\n" +
-	"\tAppConfig\x122\n" +
-	"\x06server\x18\x01 \x01(\v2\x1a.skyline.api.config.ServerR\x06server\x12,\n" +
-	"\x04data\x18\x02 \x01(\v2\x18.skyline.api.config.DataR\x04data\x122\n" +
-	"\x06pubsub\x18\x03 \x01(\v2\x1a.skyline.api.config.PubSubR\x06pubsub\x128\n" +
-	"\bsecurity\x18\x04 \x01(\v2\x1c.skyline.api.config.SecurityR\bsecurity\x12,\n" +
-	"\x04file\x18\x05 \x01(\v2\x18.skyline.api.config.FileR\x04file\x12)\n" +
-	"\x03app\x18\x06 \x01(\v2\x17.skyline.api.config.AppR\x03app\"\xe2\x01\n" +
-	"\x06Server\x12,\n" +
-	"\x04http\x18\x01 \x01(\v2\x18.skyline.api.config.HttpR\x04http\x12,\n" +
-	"\x04grpc\x18\x02 \x01(\v2\x18.skyline.api.config.GRPCR\x04grpc\x127\n" +
+	"\fconfig.proto\x12\x0flynx.api.config\"\xa2\x02\n" +
+	"\tAppConfig\x12/\n" +
+	"\x06server\x18\x01 \x01(\v2\x17.lynx.api.config.ServerR\x06server\x12)\n" +
+	"\x04data\x18\x02 \x01(\v2\x15.lynx.api.config.DataR\x04data\x12/\n" +
+	"\x06pubsub\x18\x03 \x01(\v2\x17.lynx.api.config.PubSubR\x06pubsub\x125\n" +
+	"\bsecurity\x18\x04 \x01(\v2\x19.lynx.api.config.SecurityR\bsecurity\x12)\n" +
+	"\x04file\x18\x05 \x01(\v2\x15.lynx.api.config.FileR\x04file\x12&\n" +
+	"\x03app\x18\x06 \x01(\v2\x14.lynx.api.config.AppR\x03app\"\xd6\x01\n" +
+	"\x06Server\x12)\n" +
+	"\x04http\x18\x01 \x01(\v2\x15.lynx.api.config.HttpR\x04http\x12)\n" +
+	"\x04grpc\x18\x02 \x01(\v2\x15.lynx.api.config.GRPCR\x04grpc\x124\n" +
 	"\n" +
-	"ai_gateway\x18\x03 \x01(\v2\x18.skyline.api.config.HttpR\taiGateway\x12C\n" +
-	"\x10messageloop_grpc\x18\x04 \x01(\v2\x18.skyline.api.config.GRPCR\x0fmessageloopGrpc\"\xf3\x01\n" +
-	"\bSecurity\x122\n" +
-	"\x03jwt\x18\x01 \x01(\v2 .skyline.api.config.Security.JwtR\x03jwt\x1a\xb2\x01\n" +
+	"ai_gateway\x18\x03 \x01(\v2\x15.lynx.api.config.HttpR\taiGateway\x12@\n" +
+	"\x10messageloop_grpc\x18\x04 \x01(\v2\x15.lynx.api.config.GRPCR\x0fmessageloopGrpc\"\xf0\x01\n" +
+	"\bSecurity\x12/\n" +
+	"\x03jwt\x18\x01 \x01(\v2\x1d.lynx.api.config.Security.JwtR\x03jwt\x1a\xb2\x01\n" +
 	"\x03Jwt\x12\x16\n" +
 	"\x06secret\x18\x01 \x01(\tR\x06secret\x12(\n" +
 	"\x10token_expiry_sec\x18\x02 \x01(\x05R\x0etokenExpirySec\x120\n" +
@@ -1284,24 +1284,24 @@ const file_config_proto_rawDesc = "" +
 	"\x18refresh_token_expiry_sec\x18\x04 \x01(\x05R\x15refreshTokenExpirySec\"4\n" +
 	"\x04GRPC\x12\x12\n" +
 	"\x04addr\x18\x01 \x01(\tR\x04addr\x12\x18\n" +
-	"\atimeout\x18\x02 \x01(\tR\atimeout\"\xcc\x02\n" +
+	"\atimeout\x18\x02 \x01(\tR\atimeout\"\xc9\x02\n" +
 	"\x04Http\x12\x12\n" +
 	"\x04addr\x18\x01 \x01(\tR\x04addr\x12\x18\n" +
-	"\atimeout\x18\x02 \x01(\tR\atimeout\x121\n" +
-	"\x04cors\x18\x04 \x01(\v2\x1d.skyline.api.config.Http.CorsR\x04cors\x1a\xe2\x01\n" +
+	"\atimeout\x18\x02 \x01(\tR\atimeout\x12.\n" +
+	"\x04cors\x18\x04 \x01(\v2\x1a.lynx.api.config.Http.CorsR\x04cors\x1a\xe2\x01\n" +
 	"\x04Cors\x12#\n" +
 	"\rallow_origins\x18\x01 \x03(\tR\fallowOrigins\x12#\n" +
 	"\rallow_methods\x18\x02 \x03(\tR\fallowMethods\x12#\n" +
 	"\rallow_headers\x18\x03 \x03(\tR\fallowHeaders\x12%\n" +
 	"\x0eexpose_headers\x18\x04 \x03(\tR\rexposeHeaders\x12+\n" +
 	"\x11allow_credentials\x18\x05 \x01(\bR\x10allowCredentials\x12\x17\n" +
-	"\amax_age\x18\x06 \x01(\x05R\x06maxAge\"\xcf\x02\n" +
+	"\amax_age\x18\x06 \x01(\x05R\x06maxAge\"\xcc\x02\n" +
 	"\bDatabase\x12\x16\n" +
 	"\x06driver\x18\x01 \x01(\tR\x06driver\x12\x18\n" +
 	"\adialect\x18\x02 \x01(\tR\adialect\x12\x16\n" +
 	"\x06source\x18\x03 \x01(\tR\x06source\x12\x14\n" +
-	"\x05debug\x18\x04 \x01(\bR\x05debug\x125\n" +
-	"\x04pool\x18\x05 \x01(\v2!.skyline.api.config.Database.PoolR\x04pool\x1a\xab\x01\n" +
+	"\x05debug\x18\x04 \x01(\bR\x05debug\x122\n" +
+	"\x04pool\x18\x05 \x01(\v2\x1e.lynx.api.config.Database.PoolR\x04pool\x1a\xab\x01\n" +
 	"\x04Pool\x12$\n" +
 	"\x0emax_idle_conns\x18\x01 \x01(\x05R\fmaxIdleConns\x12$\n" +
 	"\x0emax_open_conns\x18\x02 \x01(\x05R\fmaxOpenConns\x12*\n" +
@@ -1310,21 +1310,21 @@ const file_config_proto_rawDesc = "" +
 	"\x05Redis\x12\x12\n" +
 	"\x04addr\x18\x01 \x01(\tR\x04addr\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x0e\n" +
-	"\x02db\x18\x03 \x01(\x05R\x02db\"q\n" +
-	"\x04Data\x128\n" +
-	"\bdatabase\x18\x01 \x01(\v2\x1c.skyline.api.config.DatabaseR\bdatabase\x12/\n" +
-	"\x05redis\x18\x02 \x01(\v2\x19.skyline.api.config.RedisR\x05redis\"\x9a\x01\n" +
-	"\x06PubSub\x12;\n" +
-	"\x05kafka\x18\x01 \x03(\v2%.skyline.api.config.PubSub.KafkaEntryR\x05kafka\x1aS\n" +
+	"\x02db\x18\x03 \x01(\x05R\x02db\"k\n" +
+	"\x04Data\x125\n" +
+	"\bdatabase\x18\x01 \x01(\v2\x19.lynx.api.config.DatabaseR\bdatabase\x12,\n" +
+	"\x05redis\x18\x02 \x01(\v2\x16.lynx.api.config.RedisR\x05redis\"\x94\x01\n" +
+	"\x06PubSub\x128\n" +
+	"\x05kafka\x18\x01 \x03(\v2\".lynx.api.config.PubSub.KafkaEntryR\x05kafka\x1aP\n" +
 	"\n" +
 	"KafkaEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12/\n" +
-	"\x05value\x18\x02 \x01(\v2\x19.skyline.api.config.KafkaR\x05value:\x028\x01\"\xa3\x04\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12,\n" +
+	"\x05value\x18\x02 \x01(\v2\x16.lynx.api.config.KafkaR\x05value:\x028\x01\"\x9d\x04\n" +
 	"\x05Kafka\x12\x18\n" +
 	"\abrokers\x18\x01 \x03(\tR\abrokers\x12\x14\n" +
-	"\x05topic\x18\x02 \x01(\tR\x05topic\x12>\n" +
-	"\bconsumer\x18\x03 \x01(\v2\".skyline.api.config.Kafka.ConsumerR\bconsumer\x12>\n" +
-	"\bproducer\x18\x04 \x01(\v2\".skyline.api.config.Kafka.ProducerR\bproducer\x1a\xaa\x01\n" +
+	"\x05topic\x18\x02 \x01(\tR\x05topic\x12;\n" +
+	"\bconsumer\x18\x03 \x01(\v2\x1f.lynx.api.config.Kafka.ConsumerR\bconsumer\x12;\n" +
+	"\bproducer\x18\x04 \x01(\v2\x1f.lynx.api.config.Kafka.ProducerR\bproducer\x1a\xaa\x01\n" +
 	"\bConsumer\x12\x19\n" +
 	"\bgroup_id\x18\x01 \x01(\tR\agroupId\x12!\n" +
 	"\fstart_offset\x18\x02 \x01(\x05R\vstartOffset\x12\x1c\n" +
@@ -1340,9 +1340,9 @@ const file_config_proto_rawDesc = "" +
 	"batch_size\x18\x03 \x01(\x05R\tbatchSize\x12#\n" +
 	"\rbatch_timeout\x18\x04 \x01(\tR\fbatchTimeout\x12!\n" +
 	"\fmapped_event\x18\x05 \x01(\tR\vmappedEvent\x12\x14\n" +
-	"\x05async\x18\x06 \x01(\bR\x05async\"\x8a\x05\n" +
-	"\x04File\x12?\n" +
-	"\abuckets\x18\x01 \x03(\v2%.skyline.api.config.File.BucketsEntryR\abuckets\x1a\xe3\x03\n" +
+	"\x05async\x18\x06 \x01(\bR\x05async\"\x81\x05\n" +
+	"\x04File\x12<\n" +
+	"\abuckets\x18\x01 \x03(\v2\".lynx.api.config.File.BucketsEntryR\abuckets\x1a\xe0\x03\n" +
 	"\x06Bucket\x12\x1a\n" +
 	"\bendpoint\x18\x01 \x01(\tR\bendpoint\x12\x1f\n" +
 	"\vbucket_name\x18\x02 \x01(\tR\n" +
@@ -1356,18 +1356,18 @@ const file_config_proto_rawDesc = "" +
 	"\vexposed_url\x18\n" +
 	" \x01(\tR\n" +
 	"exposedUrl\x12-\n" +
-	"\x12include_categories\x18\v \x03(\tR\x11includeCategories\x12f\n" +
-	"\x13file_path_templates\x18\f \x03(\v26.skyline.api.config.File.Bucket.FilePathTemplatesEntryR\x11filePathTemplates\x1aD\n" +
+	"\x12include_categories\x18\v \x03(\tR\x11includeCategories\x12c\n" +
+	"\x13file_path_templates\x18\f \x03(\v23.lynx.api.config.File.Bucket.FilePathTemplatesEntryR\x11filePathTemplates\x1aD\n" +
 	"\x16FilePathTemplatesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a[\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1aX\n" +
 	"\fBucketsEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x125\n" +
-	"\x05value\x18\x02 \x01(\v2\x1f.skyline.api.config.File.BucketR\x05value:\x028\x01\"3\n" +
-	"\x03App\x12,\n" +
-	"\x04user\x18\x01 \x01(\v2\x18.skyline.api.config.UserR\x04user\"6\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x122\n" +
+	"\x05value\x18\x02 \x01(\v2\x1c.lynx.api.config.File.BucketR\x05value:\x028\x01\"0\n" +
+	"\x03App\x12)\n" +
+	"\x04user\x18\x01 \x01(\v2\x15.lynx.api.config.UserR\x04user\"6\n" +
 	"\x04User\x12.\n" +
-	"\x13default_avatar_urls\x18\x01 \x03(\tR\x11defaultAvatarUrlsB2Z0github.com/lynx-go/lynx-clean-template/internal/pkg/configb\x06proto3"
+	"\x13default_avatar_urls\x18\x01 \x03(\tR\x11defaultAvatarUrlsB<Z:github.com/lynx-go/lynx-clean-template/internal/pkg/configb\x06proto3"
 
 var (
 	file_config_proto_rawDescOnce sync.Once
@@ -1383,53 +1383,53 @@ func file_config_proto_rawDescGZIP() []byte {
 
 var file_config_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
 var file_config_proto_goTypes = []any{
-	(*AppConfig)(nil),      // 0: skyline.api.config.AppConfig
-	(*Server)(nil),         // 1: skyline.api.config.Server
-	(*Security)(nil),       // 2: skyline.api.config.Security
-	(*GRPC)(nil),           // 3: skyline.api.config.GRPC
-	(*Http)(nil),           // 4: skyline.api.config.Http
-	(*Database)(nil),       // 5: skyline.api.config.Database
-	(*Redis)(nil),          // 6: skyline.api.config.Redis
-	(*Data)(nil),           // 7: skyline.api.config.Data
-	(*PubSub)(nil),         // 8: skyline.api.config.PubSub
-	(*Kafka)(nil),          // 9: skyline.api.config.Kafka
-	(*File)(nil),           // 10: skyline.api.config.File
-	(*App)(nil),            // 11: skyline.api.config.App
-	(*User)(nil),           // 12: skyline.api.config.User
-	(*Security_Jwt)(nil),   // 13: skyline.api.config.Security.Jwt
-	(*Http_Cors)(nil),      // 14: skyline.api.config.Http.Cors
-	(*Database_Pool)(nil),  // 15: skyline.api.config.Database.Pool
-	nil,                    // 16: skyline.api.config.PubSub.KafkaEntry
-	(*Kafka_Consumer)(nil), // 17: skyline.api.config.Kafka.Consumer
-	(*Kafka_Producer)(nil), // 18: skyline.api.config.Kafka.Producer
-	(*File_Bucket)(nil),    // 19: skyline.api.config.File.Bucket
-	nil,                    // 20: skyline.api.config.File.BucketsEntry
-	nil,                    // 21: skyline.api.config.File.Bucket.FilePathTemplatesEntry
+	(*AppConfig)(nil),      // 0: lynx.api.config.AppConfig
+	(*Server)(nil),         // 1: lynx.api.config.Server
+	(*Security)(nil),       // 2: lynx.api.config.Security
+	(*GRPC)(nil),           // 3: lynx.api.config.GRPC
+	(*Http)(nil),           // 4: lynx.api.config.Http
+	(*Database)(nil),       // 5: lynx.api.config.Database
+	(*Redis)(nil),          // 6: lynx.api.config.Redis
+	(*Data)(nil),           // 7: lynx.api.config.Data
+	(*PubSub)(nil),         // 8: lynx.api.config.PubSub
+	(*Kafka)(nil),          // 9: lynx.api.config.Kafka
+	(*File)(nil),           // 10: lynx.api.config.File
+	(*App)(nil),            // 11: lynx.api.config.App
+	(*User)(nil),           // 12: lynx.api.config.User
+	(*Security_Jwt)(nil),   // 13: lynx.api.config.Security.Jwt
+	(*Http_Cors)(nil),      // 14: lynx.api.config.Http.Cors
+	(*Database_Pool)(nil),  // 15: lynx.api.config.Database.Pool
+	nil,                    // 16: lynx.api.config.PubSub.KafkaEntry
+	(*Kafka_Consumer)(nil), // 17: lynx.api.config.Kafka.Consumer
+	(*Kafka_Producer)(nil), // 18: lynx.api.config.Kafka.Producer
+	(*File_Bucket)(nil),    // 19: lynx.api.config.File.Bucket
+	nil,                    // 20: lynx.api.config.File.BucketsEntry
+	nil,                    // 21: lynx.api.config.File.Bucket.FilePathTemplatesEntry
 }
 var file_config_proto_depIdxs = []int32{
-	1,  // 0: skyline.api.config.AppConfig.server:type_name -> skyline.api.config.Server
-	7,  // 1: skyline.api.config.AppConfig.data:type_name -> skyline.api.config.Data
-	8,  // 2: skyline.api.config.AppConfig.pubsub:type_name -> skyline.api.config.PubSub
-	2,  // 3: skyline.api.config.AppConfig.security:type_name -> skyline.api.config.Security
-	10, // 4: skyline.api.config.AppConfig.file:type_name -> skyline.api.config.File
-	11, // 5: skyline.api.config.AppConfig.app:type_name -> skyline.api.config.App
-	4,  // 6: skyline.api.config.Server.http:type_name -> skyline.api.config.Http
-	3,  // 7: skyline.api.config.Server.grpc:type_name -> skyline.api.config.GRPC
-	4,  // 8: skyline.api.config.Server.ai_gateway:type_name -> skyline.api.config.Http
-	3,  // 9: skyline.api.config.Server.messageloop_grpc:type_name -> skyline.api.config.GRPC
-	13, // 10: skyline.api.config.Security.jwt:type_name -> skyline.api.config.Security.Jwt
-	14, // 11: skyline.api.config.Http.cors:type_name -> skyline.api.config.Http.Cors
-	15, // 12: skyline.api.config.Database.pool:type_name -> skyline.api.config.Database.Pool
-	5,  // 13: skyline.api.config.Data.database:type_name -> skyline.api.config.Database
-	6,  // 14: skyline.api.config.Data.redis:type_name -> skyline.api.config.Redis
-	16, // 15: skyline.api.config.PubSub.kafka:type_name -> skyline.api.config.PubSub.KafkaEntry
-	17, // 16: skyline.api.config.Kafka.consumer:type_name -> skyline.api.config.Kafka.Consumer
-	18, // 17: skyline.api.config.Kafka.producer:type_name -> skyline.api.config.Kafka.Producer
-	20, // 18: skyline.api.config.File.buckets:type_name -> skyline.api.config.File.BucketsEntry
-	12, // 19: skyline.api.config.App.user:type_name -> skyline.api.config.User
-	9,  // 20: skyline.api.config.PubSub.KafkaEntry.value:type_name -> skyline.api.config.Kafka
-	21, // 21: skyline.api.config.File.Bucket.file_path_templates:type_name -> skyline.api.config.File.Bucket.FilePathTemplatesEntry
-	19, // 22: skyline.api.config.File.BucketsEntry.value:type_name -> skyline.api.config.File.Bucket
+	1,  // 0: lynx.api.config.AppConfig.server:type_name -> lynx.api.config.Server
+	7,  // 1: lynx.api.config.AppConfig.data:type_name -> lynx.api.config.Data
+	8,  // 2: lynx.api.config.AppConfig.pubsub:type_name -> lynx.api.config.PubSub
+	2,  // 3: lynx.api.config.AppConfig.security:type_name -> lynx.api.config.Security
+	10, // 4: lynx.api.config.AppConfig.file:type_name -> lynx.api.config.File
+	11, // 5: lynx.api.config.AppConfig.app:type_name -> lynx.api.config.App
+	4,  // 6: lynx.api.config.Server.http:type_name -> lynx.api.config.Http
+	3,  // 7: lynx.api.config.Server.grpc:type_name -> lynx.api.config.GRPC
+	4,  // 8: lynx.api.config.Server.ai_gateway:type_name -> lynx.api.config.Http
+	3,  // 9: lynx.api.config.Server.messageloop_grpc:type_name -> lynx.api.config.GRPC
+	13, // 10: lynx.api.config.Security.jwt:type_name -> lynx.api.config.Security.Jwt
+	14, // 11: lynx.api.config.Http.cors:type_name -> lynx.api.config.Http.Cors
+	15, // 12: lynx.api.config.Database.pool:type_name -> lynx.api.config.Database.Pool
+	5,  // 13: lynx.api.config.Data.database:type_name -> lynx.api.config.Database
+	6,  // 14: lynx.api.config.Data.redis:type_name -> lynx.api.config.Redis
+	16, // 15: lynx.api.config.PubSub.kafka:type_name -> lynx.api.config.PubSub.KafkaEntry
+	17, // 16: lynx.api.config.Kafka.consumer:type_name -> lynx.api.config.Kafka.Consumer
+	18, // 17: lynx.api.config.Kafka.producer:type_name -> lynx.api.config.Kafka.Producer
+	20, // 18: lynx.api.config.File.buckets:type_name -> lynx.api.config.File.BucketsEntry
+	12, // 19: lynx.api.config.App.user:type_name -> lynx.api.config.User
+	9,  // 20: lynx.api.config.PubSub.KafkaEntry.value:type_name -> lynx.api.config.Kafka
+	21, // 21: lynx.api.config.File.Bucket.file_path_templates:type_name -> lynx.api.config.File.Bucket.FilePathTemplatesEntry
+	19, // 22: lynx.api.config.File.BucketsEntry.value:type_name -> lynx.api.config.File.Bucket
 	23, // [23:23] is the sub-list for method output_type
 	23, // [23:23] is the sub-list for method input_type
 	23, // [23:23] is the sub-list for extension type_name

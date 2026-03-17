@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package skyline.api.config;
+package lynx.api.config;
 
 option go_package = "github.com/lynx-go/lynx-clean-template/internal/pkg/config";
 

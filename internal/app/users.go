@@ -8,6 +8,7 @@ import (
 	sharedpb "github.com/lynx-go/lynx-clean-template/genproto/shared"
 	"github.com/lynx-go/lynx-clean-template/internal/domain/files"
 	"github.com/lynx-go/lynx-clean-template/internal/domain/users/repo"
+	"github.com/lynx-go/lynx-clean-template/internal/pkg/contexts"
 	apierrors "github.com/lynx-go/lynx-clean-template/pkg/errors"
 	"github.com/lynx-go/lynx-clean-template/pkg/idgen"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -65,7 +66,7 @@ type Users struct {
 // Only allows viewing own profile or requires admin/superadmin role
 func (uc *Users) GetUserProfile(ctx context.Context, req *apipb.GetUserProfileRequest) (*apipb.UserProfile, error) {
 	var userID idgen.ID
-	currentUser := session.LoginUser(ctx)
+	currentUser, _ := contexts.UserID(ctx)
 
 	// When user_id is "-", return the current user's profile
 	if req.UserId == "-" {
@@ -99,7 +100,7 @@ func (uc *Users) GetUserProfile(ctx context.Context, req *apipb.GetUserProfileRe
 }
 
 func (uc *Users) UpdateMyProfile(ctx context.Context, req *apipb.UpdateMyProfileRequest) (*apipb.UserProfile, error) {
-	uid := session.LoginUser(ctx)
+	uid, _ := contexts.UserID(ctx)
 
 	if req.User == nil {
 		return nil, apierrors.New(400, "User data is required")

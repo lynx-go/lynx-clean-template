@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/lynx-go/lynx-clean-template/internal/pkg/config"
+	"github.com/lynx-go/lynx-clean-template/pkg/bundebug"
 	"github.com/redis/go-redis/v9"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"

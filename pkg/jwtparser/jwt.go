@@ -7,13 +7,13 @@ import (
 )
 
 func ParseToken(hmacSecretByte []byte, tokenString string) (userID string, username string, vars map[string]string, exp int64, tokenId string, issuedAt int64, ok bool) {
-	jwtToken, err := jwt.ParseWithClaims(tokenString, &echosrv.SessionTokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+	jwtToken, err := jwt.ParseWithClaims(tokenString, &SessionTokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return hmacSecretByte, nil
 	}, jwt.WithExpirationRequired(), jwt.WithValidMethods([]string{"HS256"}))
 	if err != nil {
 		return
 	}
-	claims, ok := jwtToken.Claims.(*echosrv.SessionTokenClaims)
+	claims, ok := jwtToken.Claims.(*SessionTokenClaims)
 	if !ok || !jwtToken.Valid {
 		return
 	}

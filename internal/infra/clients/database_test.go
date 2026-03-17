@@ -11,9 +11,9 @@ func TestValidateDatabaseSource(t *testing.T) {
 		wantErr bool
 	}{
 		{name: "empty", source: "", wantErr: true},
-		{name: "no scheme", source: "skyline:skyline@localhost:5432/skyline?sslmode=disable", wantErr: true},
-		{name: "postgres", source: "postgres://skyline:skyline@localhost:5432/skyline?sslmode=disable", wantErr: false},
-		{name: "postgresql", source: "postgresql://skyline:skyline@localhost:5432/skyline?sslmode=disable", wantErr: false},
+		{name: "no scheme", source: "lynx:lynx@localhost:5432/lynx?sslmode=disable", wantErr: true},
+		{name: "postgres", source: "postgres://lynx:lynx@localhost:5432/lynx?sslmode=disable", wantErr: false},
+		{name: "postgresql", source: "postgresql://lynx:lynx@localhost:5432/lynx?sslmode=disable", wantErr: false},
 	}
 
 	for _, tc := range tests {

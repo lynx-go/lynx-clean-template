@@ -588,7 +588,7 @@ const file_api_v1_groups_proto_rawDesc = "" +
 	"ListGroups\x12\x1e.lynx.api.v1.ListGroupsRequest\x1a\x1f.lynx.api.v1.ListGroupsResponse\"\x12\x82\xd3\xe4\x93\x02\f\x12\n" +
 	"/v1/groups\x12d\n" +
 	"\vUpdateGroup\x12\x1f.lynx.api.v1.UpdateGroupRequest\x1a\x12.lynx.api.v1.Group\" \x82\xd3\xe4\x93\x02\x1a:\x01*2\x15/v1/groups/{group_id}\x12o\n" +
-	"\vDeleteGroup\x12\x1f.lynx.api.v1.DeleteGroupRequest\x1a .lynx.api.v1.DeleteGroupResponse\"\x1d\x82\xd3\xe4\x93\x02\x17*\x15/v1/groups/{group_id}B<Z:github.com/lynx-go/lynx-clean-template/genproto/api/v1;apipbb\x06proto3"
+	"\vDeleteGroup\x12\x1f.lynx.api.v1.DeleteGroupRequest\x1a .lynx.api.v1.DeleteGroupResponse\"\x1d\x82\xd3\xe4\x93\x02\x17*\x15/v1/groups/{group_id}B>Z<github.com/lynx-go/lynx-clean-template/genproto/api/v1;apipbb\x06proto3"
 
 var (
 	file_api_v1_groups_proto_rawDescOnce sync.Once

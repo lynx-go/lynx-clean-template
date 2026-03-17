@@ -1,7 +1,6 @@
 package server
 
 import (
-	"context"
 	"time"
 
 	"github.com/lynx-go/lynx-clean-template/internal/api/eventhandler"
@@ -26,40 +25,6 @@ func NewPubSubRouter(
 	return pubsub.NewRouter(pubSub, []pubsub.Handler{
 		hello,
 	})
-}
-
-// NewMessageLoopClient creates a MessageLoop client for publishing events
-func NewMessageLoopClient(config *config.AppConfig) (messageloopgo.Client, error) {
-	mlConfig := config.GetServer().GetMessageloopGrpc()
-	if mlConfig == nil {
-		// MessageLoop config not available - notifications won't be forwarded
-		return nil, nil
-	}
-
-	addr := mlConfig.Addr
-	if addr == "" {
-		// MessageLoop address not configured - notifications won't be forwarded
-		return nil, nil
-	}
-
-	// Connect to MessageLoop gRPC
-	client, err := messageloopgo.DialGRPC(addr,
-		messageloopgo.WithDialTimeout(5*time.Second),
-		messageloopgo.WithToken("skyline-backend"),
-	)
-	if err != nil {
-		// Connection failed - notifications won't be forwarded
-		return nil, nil
-	}
-
-	// Start connection in background
-	ctx := context.Background()
-	if err := client.Connect(ctx); err != nil {
-		// Connection failed - notifications won't be forwarded
-		return nil, nil
-	}
-
-	return client, nil
 }
 
 func NewKafkaBinderForServer(config *config.AppConfig) *kafka.Binder {

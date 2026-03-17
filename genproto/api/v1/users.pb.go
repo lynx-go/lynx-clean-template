@@ -316,7 +316,7 @@ const file_api_v1_users_proto_rawDesc = "" +
 	"\auser_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x06userId2\xf8\x01\n" +
 	"\fUsersService\x12s\n" +
 	"\x0fUpdateMyProfile\x12#.lynx.api.v1.UpdateMyProfileRequest\x1a\x18.lynx.api.v1.UserProfile\"!\x82\xd3\xe4\x93\x02\x1b:\x04user2\x13/v1/users/-/profile\x12s\n" +
-	"\x0eGetUserProfile\x12\".lynx.api.v1.GetUserProfileRequest\x1a\x18.lynx.api.v1.UserProfile\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/v1/users/{user_id}/profileB<Z:github.com/lynx-go/lynx-clean-template/genproto/api/v1;apipbb\x06proto3"
+	"\x0eGetUserProfile\x12\".lynx.api.v1.GetUserProfileRequest\x1a\x18.lynx.api.v1.UserProfile\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/v1/users/{user_id}/profileB>Z<github.com/lynx-go/lynx-clean-template/genproto/api/v1;apipbb\x06proto3"
 
 var (
 	file_api_v1_users_proto_rawDescOnce sync.Once

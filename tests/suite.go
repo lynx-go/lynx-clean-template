@@ -121,7 +121,7 @@ func buildTestSuite(fn func(ctx context.Context, ts *TestingSuite) error, opts .
 
 func newTestOptions() *lynx.Options {
 	return lynx.NewOptions(
-		lynx.WithName("skyline:test"),
+		lynx.WithName("lynx:test"),
 		lynx.WithBindConfigFunc(config.NewBindConfigFunc("./configs", "../configs", "../../configs")),
 	)
 }
