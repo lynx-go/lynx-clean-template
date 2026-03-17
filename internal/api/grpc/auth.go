@@ -36,4 +36,23 @@ func (a *AuthService) SignUp(ctx context.Context, req *apipb.SignUpRequest) (*ap
 	return a.uc.SignUp(ctx, req)
 }
 
+func (a *AuthService) VerifySignUpEmail(ctx context.Context, req *apipb.VerifySignUpEmailRequest) (*apipb.VerifySignUpEmailResponse, error) {
+	if err := a.uc.VerifySignUpEmailCode(ctx, req.Email, req.Code); err != nil {
+		return nil, err
+	}
+	return &apipb.VerifySignUpEmailResponse{
+		Verified: true,
+	}, nil
+}
+
+func (a *AuthService) ResendSignUpEmailCode(ctx context.Context, req *apipb.ResendSignUpEmailCodeRequest) (*apipb.ResendSignUpEmailCodeResponse, error) {
+	remaining, err := a.uc.ResendSignUpEmailCode(ctx, req.Email)
+	if err != nil {
+		return nil, err
+	}
+	return &apipb.ResendSignUpEmailCodeResponse{
+		NextRetryAfterSec: remaining,
+	}, nil
+}
+
 var _ apipb.AuthServiceServer = new(AuthService)

@@ -29,6 +29,8 @@ func NewGRPCServer(
 	authInterceptor, err := interceptor.NewAuthInterceptor(authValidator,
 		[]string{
 			apipb.AuthService_Token_FullMethodName,
+			apipb.AuthService_VerifySignUpEmail_FullMethodName,
+			apipb.AuthService_ResendSignUpEmailCode_FullMethodName,
 		})
 	if err != nil {
 		return nil, err

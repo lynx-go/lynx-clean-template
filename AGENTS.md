@@ -32,3 +32,4 @@
 ## Known Template Drift / Checks
 - `Taskfile.yml` still references CLI commands `create-user` and `gen-api-key`, but current `cmd/cli/cmd/*` exposes commands like `hello` and `print-config`; verify task targets before relying on them.
 
+## 对话和文档优先使用中文

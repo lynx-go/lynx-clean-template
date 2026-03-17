@@ -16,6 +16,38 @@
     "application/json"
   ],
   "paths": {
+    "/v1/resend-email-code": {
+      "post": {
+        "operationId": "AuthService_ResendSignUpEmailCode",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ResendSignUpEmailCodeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1ResendSignUpEmailCodeRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AuthService"
+        ]
+      }
+    },
     "/v1/signUp": {
       "post": {
         "operationId": "AuthService_SignUp",
@@ -72,6 +104,38 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/v1TokenRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AuthService"
+        ]
+      }
+    },
+    "/v1/verify-email": {
+      "post": {
+        "operationId": "AuthService_VerifySignUpEmail",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1VerifySignUpEmailResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1VerifySignUpEmailRequest"
             }
           }
         ],
@@ -194,6 +258,23 @@
         }
       }
     },
+    "v1ResendSignUpEmailCodeRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        }
+      }
+    },
+    "v1ResendSignUpEmailCodeResponse": {
+      "type": "object",
+      "properties": {
+        "nextRetryAfterSec": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
     "v1SignUpRequest": {
       "type": "object",
       "properties": {
@@ -267,6 +348,25 @@
         },
         "userInfo": {
           "$ref": "#/definitions/sharedUser"
+        }
+      }
+    },
+    "v1VerifySignUpEmailRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        }
+      }
+    },
+    "v1VerifySignUpEmailResponse": {
+      "type": "object",
+      "properties": {
+        "verified": {
+          "type": "boolean"
         }
       }
     }

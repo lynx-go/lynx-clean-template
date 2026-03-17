@@ -2,6 +2,9 @@ package app
 
 import (
 	"context"
+	"crypto/sha256"
+	"fmt"
+	"math/rand/v2"
 	"net/http"
 	"time"
 
@@ -16,6 +19,7 @@ import (
 	"github.com/lynx-go/lynx-clean-template/internal/pkg/config"
 	"github.com/lynx-go/lynx-clean-template/internal/pkg/contexts"
 	apierrors "github.com/lynx-go/lynx-clean-template/pkg/errors"
+	"github.com/lynx-go/lynx-clean-template/pkg/idgen"
 	"github.com/lynx-go/lynx-clean-template/pkg/idgen/uuid"
 	"github.com/lynx-go/lynx-clean-template/pkg/jwtparser"
 	"github.com/pkg/errors"
@@ -23,14 +27,17 @@ import (
 )
 
 type Account struct {
-	usersRepo         usersrepo.UsersRepo
-	refreshTokensRepo usersrepo.RefreshTokensRepo
-	groupsRepo        groupsrepo.GroupsRepo
-	config            *config.AppConfig
-	userSvc           *users.UserService
-	publisher         shared.EventPublisher
-	hasher            shared.PasswordHasher
-	logger            shared.Logger
+	usersRepo                  usersrepo.UsersRepo
+	refreshTokensRepo          usersrepo.RefreshTokensRepo
+	emailVerificationCodesRepo usersrepo.EmailVerificationCodesRepo
+	groupsRepo                 groupsrepo.GroupsRepo
+	config                     *config.AppConfig
+	userSvc                    *users.UserService
+	publisher                  shared.EventPublisher
+	hasher                     shared.PasswordHasher
+	logger                     shared.Logger
+	emailTemplateRenderer      shared.EmailTemplateRenderer
+	emailSender                shared.EmailSender
 }
 
 const (
@@ -41,22 +48,28 @@ const (
 func NewAccount(
 	usersRepo usersrepo.UsersRepo,
 	refreshTokensRepo usersrepo.RefreshTokensRepo,
+	emailVerificationCodesRepo usersrepo.EmailVerificationCodesRepo,
 	config *config.AppConfig,
 	groupsRepo groupsrepo.GroupsRepo,
 	userSvc *users.UserService,
 	publisher shared.EventPublisher,
 	hasher shared.PasswordHasher,
 	logger shared.Logger,
+	emailTemplateRenderer shared.EmailTemplateRenderer,
+	emailSender shared.EmailSender,
 ) *Account {
 	return &Account{
-		usersRepo:         usersRepo,
-		refreshTokensRepo: refreshTokensRepo,
-		config:            config,
-		groupsRepo:        groupsRepo,
-		userSvc:           userSvc,
-		publisher:         publisher,
-		hasher:            hasher,
-		logger:            logger,
+		usersRepo:                  usersRepo,
+		refreshTokensRepo:          refreshTokensRepo,
+		emailVerificationCodesRepo: emailVerificationCodesRepo,
+		config:                     config,
+		groupsRepo:                 groupsRepo,
+		userSvc:                    userSvc,
+		publisher:                  publisher,
+		hasher:                     hasher,
+		logger:                     logger,
+		emailTemplateRenderer:      emailTemplateRenderer,
+		emailSender:                emailSender,
 	}
 }
 
@@ -95,6 +108,11 @@ func (uc *Account) AuthorizeByPassword(ctx context.Context, req *apipb.TokenRequ
 	}
 	if len(user.PasswordHash) == 0 {
 		return nil, authFailed("invalid username or password")
+	}
+
+	// 检查邮箱是否已验证
+	if user.Status != 1 || user.EmailConfirmedAt.IsZero() {
+		return nil, apierrors.NewStatusError(http.StatusUnauthorized, "email_not_verified")
 	}
 
 	err = uc.hasher.Compare(user.PasswordHash, password)
@@ -179,6 +197,16 @@ func (uc *Account) CreateUser(ctx context.Context, req *apipb.SignUpRequest, isS
 		return nil, err
 	}
 
+	user, err := uc.usersRepo.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	// 生成并发送验证码（不阻塞主流程）
+	if err := uc.sendSignUpEmailCode(ctx, user); err != nil {
+		uc.logger.ErrorContext(ctx, "failed to send signup email code", err, "user_id", id)
+	}
+
 	// Publish event from app layer after successful domain operation
 	if err := uc.publisher.Publish(ctx, events.TopicUserEvents.String(), events.EventAccountCreated.String(), &events.AccountCreatedEvent{
 		UserID:      id,
@@ -188,10 +216,6 @@ func (uc *Account) CreateUser(ctx context.Context, req *apipb.SignUpRequest, isS
 		uc.logger.ErrorContext(ctx, "failed to publish users:created event", err)
 	}
 
-	user, err := uc.usersRepo.Get(ctx, id)
-	if err != nil {
-		return nil, err
-	}
 
 	return &apipb.SignUpResponse{
 		UserInfo: NewProtoUserFromUser(user),
@@ -283,6 +307,185 @@ func (uc *Account) Logout(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+// sendSignUpEmailCode generates a 6-digit OTP, supersedes old codes, and sends it via email.
+func (uc *Account) sendSignUpEmailCode(ctx context.Context, user *usersrepo.User) error {
+	now := time.Now()
+
+	// Supersede any existing active codes for this user+purpose
+	if err := uc.emailVerificationCodesRepo.SupersedeActiveByUserPurpose(
+		ctx, user.ID, usersrepo.VerificationPurposeSignUp, now); err != nil {
+		return errors.Wrap(err, "failed to supersede old codes")
+	}
+
+	// Generate 6-digit code
+	code := generateSixDigitCode()
+	codeHash := hashCode(code)
+
+	// Create verification record
+	verifyCode := &usersrepo.EmailVerificationCode{
+		ID:          idgen.BigID(),
+		UserID:      user.ID,
+		Email:       user.Email,
+		Purpose:     usersrepo.VerificationPurposeSignUp,
+		CodeHash:    codeHash,
+		Status:      usersrepo.VerificationCodeStatusActive,
+		AttemptCount: 0,
+		MaxAttempts: 5,
+		ExpiresAt:   now.Add(10 * time.Minute),
+		SentAt:      now,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		CreatedBy:   user.ID,
+		UpdatedBy:   user.ID,
+	}
+
+	if err := uc.emailVerificationCodesRepo.Create(ctx, verifyCode); err != nil {
+		return errors.Wrap(err, "failed to create verification code record")
+	}
+
+	// Render email template
+	subject, body, err := uc.emailTemplateRenderer.Render("signup_email_code", map[string]string{
+		"code":             code,
+		"expires_minutes":  "10",
+		"product_name":     "Lynx",
+	})
+	if err != nil {
+		return errors.Wrap(err, "failed to render email template")
+	}
+
+	// Send email (async to not block signup)
+	if err := uc.emailSender.Send(ctx, shared.EmailMessage{
+		To:         user.Email,
+		Subject:    subject,
+		Body:       body,
+		TemplateID: "signup_email_code",
+	}); err != nil {
+		return errors.Wrap(err, "failed to send email")
+	}
+
+	return nil
+}
+
+// VerifySignUpEmailCode verifies a code and marks user as verified if correct.
+func (uc *Account) VerifySignUpEmailCode(ctx context.Context, email, code string) error {
+	now := time.Now()
+
+	// Lookup user by email
+	user, err := uc.usersRepo.GetByEmail(ctx, email)
+	if err != nil {
+		return errors.Wrap(err, "failed to query user")
+	}
+	if user == nil {
+		return apierrors.NewStatusError(http.StatusNotFound, "user_not_found")
+	}
+
+	// Get latest active code
+	activeCode, err := uc.emailVerificationCodesRepo.GetLatestActive(
+		ctx, user.ID, usersrepo.VerificationPurposeSignUp)
+	if err != nil {
+		return errors.Wrap(err, "failed to query verification code")
+	}
+	if activeCode == nil {
+		return apierrors.NewStatusError(http.StatusBadRequest, "verification_code_not_found")
+	}
+
+	// Check expiry
+	if now.After(activeCode.ExpiresAt) {
+		if err := uc.emailVerificationCodesRepo.MarkStatus(
+			ctx, activeCode.ID, usersrepo.VerificationCodeStatusExpired, now); err != nil {
+			uc.logger.ErrorContext(ctx, "failed to mark code expired", err)
+		}
+		return apierrors.NewStatusError(http.StatusBadRequest, "verification_code_expired")
+	}
+
+	// Validate code
+	if !verifyCodeHash(code, activeCode.CodeHash) {
+		// Increment attempt
+		attemptCount, err := uc.emailVerificationCodesRepo.IncrementAttempt(ctx, activeCode.ID, now)
+		if err != nil {
+			uc.logger.ErrorContext(ctx, "failed to increment attempt", err)
+		}
+		if attemptCount >= activeCode.MaxAttempts {
+			if err := uc.emailVerificationCodesRepo.MarkStatus(
+				ctx, activeCode.ID, usersrepo.VerificationCodeStatusLocked, now); err != nil {
+				uc.logger.ErrorContext(ctx, "failed to mark code locked", err)
+			}
+			return apierrors.NewStatusError(http.StatusBadRequest, "verification_code_locked")
+		}
+		return apierrors.NewStatusError(http.StatusBadRequest, "verification_code_invalid")
+	}
+
+	// Mark code as used
+	if err := uc.emailVerificationCodesRepo.MarkUsed(ctx, activeCode.ID, now); err != nil {
+		return errors.Wrap(err, "failed to mark code used")
+	}
+
+	// Update user as verified
+	user.EmailConfirmedAt = now
+	user.ConfirmedAt = now
+	user.Status = 1
+	user.UpdatedAt = now
+	if err := uc.usersRepo.Update(ctx, user, "email_confirmed_at", "confirmed_at", "status", "updated_at"); err != nil {
+		return errors.Wrap(err, "failed to update user verification status")
+	}
+
+	return nil
+}
+
+// ResendSignUpEmailCode enforces cooldown and resends a new code.
+func (uc *Account) ResendSignUpEmailCode(ctx context.Context, email string) (int64, error) {
+	now := time.Now()
+
+	// Lookup user by email
+	user, err := uc.usersRepo.GetByEmail(ctx, email)
+	if err != nil {
+		return 0, errors.Wrap(err, "failed to query user")
+	}
+	if user == nil {
+		return 0, apierrors.NewStatusError(http.StatusNotFound, "user_not_found")
+	}
+
+	// Check existing active code and cooldown
+	activeCode, err := uc.emailVerificationCodesRepo.GetLatestActive(
+		ctx, user.ID, usersrepo.VerificationPurposeSignUp)
+	if err != nil {
+		return 0, errors.Wrap(err, "failed to query verification code")
+	}
+
+	if activeCode != nil {
+		elapsed := now.Sub(activeCode.SentAt).Seconds()
+		if elapsed < 60 {
+			remaining := int64(60 - int(elapsed))
+			return remaining, apierrors.NewStatusError(http.StatusTooManyRequests, "verification_code_rate_limited")
+		}
+	}
+
+	// Send new code
+	if err := uc.sendSignUpEmailCode(ctx, user); err != nil {
+		return 0, err
+	}
+
+	return 0, nil
+}
+
+// generateSixDigitCode returns a random 6-digit string.
+func generateSixDigitCode() string {
+	code := rand.IntN(1000000)
+	return fmt.Sprintf("%06d", code)
+}
+
+// hashCode returns SHA256 hash of the code.
+func hashCode(code string) string {
+	h := sha256.New()
+	h.Write([]byte(code))
+	return fmt.Sprintf("%x", h.Sum(nil))
+}
+
+// verifyCodeHash compares plaintext code against its hash.
+func verifyCodeHash(code, hash string) bool {
+	return hashCode(code) == hash
 }
 
 func NewProtoUserFromUser(v *usersrepo.User) *sharedpb.User {

@@ -418,6 +418,190 @@ func (x *SignUpResponse) GetUserInfo() *shared.User {
 	return nil
 }
 
+type VerifySignUpEmailRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
+	Code          string                 `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VerifySignUpEmailRequest) Reset() {
+	*x = VerifySignUpEmailRequest{}
+	mi := &file_api_v1_auth_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VerifySignUpEmailRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VerifySignUpEmailRequest) ProtoMessage() {}
+
+func (x *VerifySignUpEmailRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_v1_auth_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VerifySignUpEmailRequest.ProtoReflect.Descriptor instead.
+func (*VerifySignUpEmailRequest) Descriptor() ([]byte, []int) {
+	return file_api_v1_auth_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *VerifySignUpEmailRequest) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *VerifySignUpEmailRequest) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+type VerifySignUpEmailResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Verified      bool                   `protobuf:"varint,1,opt,name=verified,proto3" json:"verified,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VerifySignUpEmailResponse) Reset() {
+	*x = VerifySignUpEmailResponse{}
+	mi := &file_api_v1_auth_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VerifySignUpEmailResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VerifySignUpEmailResponse) ProtoMessage() {}
+
+func (x *VerifySignUpEmailResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_v1_auth_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VerifySignUpEmailResponse.ProtoReflect.Descriptor instead.
+func (*VerifySignUpEmailResponse) Descriptor() ([]byte, []int) {
+	return file_api_v1_auth_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *VerifySignUpEmailResponse) GetVerified() bool {
+	if x != nil {
+		return x.Verified
+	}
+	return false
+}
+
+type ResendSignUpEmailCodeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ResendSignUpEmailCodeRequest) Reset() {
+	*x = ResendSignUpEmailCodeRequest{}
+	mi := &file_api_v1_auth_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ResendSignUpEmailCodeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResendSignUpEmailCodeRequest) ProtoMessage() {}
+
+func (x *ResendSignUpEmailCodeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_v1_auth_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResendSignUpEmailCodeRequest.ProtoReflect.Descriptor instead.
+func (*ResendSignUpEmailCodeRequest) Descriptor() ([]byte, []int) {
+	return file_api_v1_auth_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *ResendSignUpEmailCodeRequest) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+type ResendSignUpEmailCodeResponse struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	NextRetryAfterSec int64                  `protobuf:"varint,1,opt,name=next_retry_after_sec,json=nextRetryAfterSec,proto3" json:"next_retry_after_sec,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *ResendSignUpEmailCodeResponse) Reset() {
+	*x = ResendSignUpEmailCodeResponse{}
+	mi := &file_api_v1_auth_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ResendSignUpEmailCodeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResendSignUpEmailCodeResponse) ProtoMessage() {}
+
+func (x *ResendSignUpEmailCodeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_v1_auth_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResendSignUpEmailCodeResponse.ProtoReflect.Descriptor instead.
+func (*ResendSignUpEmailCodeResponse) Descriptor() ([]byte, []int) {
+	return file_api_v1_auth_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ResendSignUpEmailCodeResponse) GetNextRetryAfterSec() int64 {
+	if x != nil {
+		return x.NextRetryAfterSec
+	}
+	return 0
+}
+
 var File_api_v1_auth_proto protoreflect.FileDescriptor
 
 const file_api_v1_auth_proto_rawDesc = "" +
@@ -455,11 +639,22 @@ const file_api_v1_auth_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"@\n" +
 	"\x0eSignUpResponse\x12.\n" +
-	"\tuser_info\x18\x03 \x01(\v2\x11.lynx.shared.UserR\buserInfo2\xbd\x01\n" +
+	"\tuser_info\x18\x03 \x01(\v2\x11.lynx.shared.UserR\buserInfo\"D\n" +
+	"\x18VerifySignUpEmailRequest\x12\x14\n" +
+	"\x05email\x18\x01 \x01(\tR\x05email\x12\x12\n" +
+	"\x04code\x18\x02 \x01(\tR\x04code\"7\n" +
+	"\x19VerifySignUpEmailResponse\x12\x1a\n" +
+	"\bverified\x18\x01 \x01(\bR\bverified\"4\n" +
+	"\x1cResendSignUpEmailCodeRequest\x12\x14\n" +
+	"\x05email\x18\x01 \x01(\tR\x05email\"P\n" +
+	"\x1dResendSignUpEmailCodeResponse\x12/\n" +
+	"\x14next_retry_after_sec\x18\x01 \x01(\x03R\x11nextRetryAfterSec2\xd1\x03\n" +
 	"\vAuthService\x12T\n" +
 	"\x05Token\x12\x19.lynx.api.v1.TokenRequest\x1a\x1a.lynx.api.v1.TokenResponse\"\x14\x82\xd3\xe4\x93\x02\x0e:\x01*\"\t/v1/token\x12X\n" +
 	"\x06SignUp\x12\x1a.lynx.api.v1.SignUpRequest\x1a\x1b.lynx.api.v1.SignUpResponse\"\x15\x82\xd3\xe4\x93\x02\x0f:\x01*\"\n" +
-	"/v1/signUpB>Z<github.com/lynx-go/lynx-clean-template/genproto/api/v1;apipbb\x06proto3"
+	"/v1/signUp\x12\x7f\n" +
+	"\x11VerifySignUpEmail\x12%.lynx.api.v1.VerifySignUpEmailRequest\x1a&.lynx.api.v1.VerifySignUpEmailResponse\"\x1b\x82\xd3\xe4\x93\x02\x15:\x01*\"\x10/v1/verify-email\x12\x90\x01\n" +
+	"\x15ResendSignUpEmailCode\x12).lynx.api.v1.ResendSignUpEmailCodeRequest\x1a*.lynx.api.v1.ResendSignUpEmailCodeResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/v1/resend-email-codeB>Z<github.com/lynx-go/lynx-clean-template/genproto/api/v1;apipbb\x06proto3"
 
 var (
 	file_api_v1_auth_proto_rawDescOnce sync.Once
@@ -473,30 +668,38 @@ func file_api_v1_auth_proto_rawDescGZIP() []byte {
 	return file_api_v1_auth_proto_rawDescData
 }
 
-var file_api_v1_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_api_v1_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_api_v1_auth_proto_goTypes = []any{
-	(*TokenRequest)(nil),             // 0: lynx.api.v1.TokenRequest
-	(*AuthorizePasswordRequest)(nil), // 1: lynx.api.v1.AuthorizePasswordRequest
-	(*TokenResponse)(nil),            // 2: lynx.api.v1.TokenResponse
-	(*RefreshTokenRequest)(nil),      // 3: lynx.api.v1.RefreshTokenRequest
-	(*SignUpRequest)(nil),            // 4: lynx.api.v1.SignUpRequest
-	(*SignUpResponse)(nil),           // 5: lynx.api.v1.SignUpResponse
-	nil,                              // 6: lynx.api.v1.SignUpRequest.DataEntry
-	(*shared.User)(nil),              // 7: lynx.shared.User
+	(*TokenRequest)(nil),                  // 0: lynx.api.v1.TokenRequest
+	(*AuthorizePasswordRequest)(nil),      // 1: lynx.api.v1.AuthorizePasswordRequest
+	(*TokenResponse)(nil),                 // 2: lynx.api.v1.TokenResponse
+	(*RefreshTokenRequest)(nil),           // 3: lynx.api.v1.RefreshTokenRequest
+	(*SignUpRequest)(nil),                 // 4: lynx.api.v1.SignUpRequest
+	(*SignUpResponse)(nil),                // 5: lynx.api.v1.SignUpResponse
+	(*VerifySignUpEmailRequest)(nil),      // 6: lynx.api.v1.VerifySignUpEmailRequest
+	(*VerifySignUpEmailResponse)(nil),     // 7: lynx.api.v1.VerifySignUpEmailResponse
+	(*ResendSignUpEmailCodeRequest)(nil),  // 8: lynx.api.v1.ResendSignUpEmailCodeRequest
+	(*ResendSignUpEmailCodeResponse)(nil), // 9: lynx.api.v1.ResendSignUpEmailCodeResponse
+	nil,                                   // 10: lynx.api.v1.SignUpRequest.DataEntry
+	(*shared.User)(nil),                   // 11: lynx.shared.User
 }
 var file_api_v1_auth_proto_depIdxs = []int32{
-	7, // 0: lynx.api.v1.TokenResponse.user_info:type_name -> lynx.shared.User
-	6, // 1: lynx.api.v1.SignUpRequest.data:type_name -> lynx.api.v1.SignUpRequest.DataEntry
-	7, // 2: lynx.api.v1.SignUpResponse.user_info:type_name -> lynx.shared.User
-	0, // 3: lynx.api.v1.AuthService.Token:input_type -> lynx.api.v1.TokenRequest
-	4, // 4: lynx.api.v1.AuthService.SignUp:input_type -> lynx.api.v1.SignUpRequest
-	2, // 5: lynx.api.v1.AuthService.Token:output_type -> lynx.api.v1.TokenResponse
-	5, // 6: lynx.api.v1.AuthService.SignUp:output_type -> lynx.api.v1.SignUpResponse
-	5, // [5:7] is the sub-list for method output_type
-	3, // [3:5] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	11, // 0: lynx.api.v1.TokenResponse.user_info:type_name -> lynx.shared.User
+	10, // 1: lynx.api.v1.SignUpRequest.data:type_name -> lynx.api.v1.SignUpRequest.DataEntry
+	11, // 2: lynx.api.v1.SignUpResponse.user_info:type_name -> lynx.shared.User
+	0,  // 3: lynx.api.v1.AuthService.Token:input_type -> lynx.api.v1.TokenRequest
+	4,  // 4: lynx.api.v1.AuthService.SignUp:input_type -> lynx.api.v1.SignUpRequest
+	6,  // 5: lynx.api.v1.AuthService.VerifySignUpEmail:input_type -> lynx.api.v1.VerifySignUpEmailRequest
+	8,  // 6: lynx.api.v1.AuthService.ResendSignUpEmailCode:input_type -> lynx.api.v1.ResendSignUpEmailCodeRequest
+	2,  // 7: lynx.api.v1.AuthService.Token:output_type -> lynx.api.v1.TokenResponse
+	5,  // 8: lynx.api.v1.AuthService.SignUp:output_type -> lynx.api.v1.SignUpResponse
+	7,  // 9: lynx.api.v1.AuthService.VerifySignUpEmail:output_type -> lynx.api.v1.VerifySignUpEmailResponse
+	9,  // 10: lynx.api.v1.AuthService.ResendSignUpEmailCode:output_type -> lynx.api.v1.ResendSignUpEmailCodeResponse
+	7,  // [7:11] is the sub-list for method output_type
+	3,  // [3:7] is the sub-list for method input_type
+	3,  // [3:3] is the sub-list for extension type_name
+	3,  // [3:3] is the sub-list for extension extendee
+	0,  // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_api_v1_auth_proto_init() }
@@ -510,7 +713,7 @@ func file_api_v1_auth_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_v1_auth_proto_rawDesc), len(file_api_v1_auth_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

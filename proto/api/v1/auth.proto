@@ -25,7 +25,20 @@ service AuthService {
       post: "/v1/signUp"
       body: "*"
     };
+  }
 
+  rpc VerifySignUpEmail(VerifySignUpEmailRequest) returns (VerifySignUpEmailResponse) {
+    option (google.api.http) = {
+      post: "/v1/verify-email"
+      body: "*"
+    };
+  }
+
+  rpc ResendSignUpEmailCode(ResendSignUpEmailCodeRequest) returns (ResendSignUpEmailCodeResponse) {
+    option (google.api.http) = {
+      post: "/v1/resend-email-code"
+      body: "*"
+    };
   }
 }
 
@@ -54,8 +67,6 @@ message TokenResponse {
   lynx.shared.User user_info = 7;
 }
 
-
-
 message RefreshTokenRequest {
   string refresh_token = 1;
 }
@@ -71,3 +82,21 @@ message SignUpRequest {
 message SignUpResponse {
   lynx.shared.User user_info = 3;
 }
+
+message VerifySignUpEmailRequest {
+  string email = 1;
+  string code = 2;
+}
+
+message VerifySignUpEmailResponse {
+  bool verified = 1;
+}
+
+message ResendSignUpEmailCodeRequest {
+  string email = 1;
+}
+
+message ResendSignUpEmailCodeResponse {
+  int64 next_retry_after_sec = 1;
+}
+

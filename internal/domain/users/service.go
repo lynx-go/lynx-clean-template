@@ -78,6 +78,13 @@ func (svc *UserService) Create(ctx context.Context, req *UserCreateRequest) (idg
 	if user != nil {
 		return "", errors.Cause("username already registered")
 	}
+	existingByEmail, err := svc.usersRepo.GetByEmail(ctx, email)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to query user")
+	}
+	if existingByEmail != nil {
+		return "", errors.Cause("email already registered")
+	}
 
 	passwordHash, err := svc.hasher.Hash(req.Password)
 	if err != nil {
@@ -100,7 +107,7 @@ func (svc *UserService) Create(ctx context.Context, req *UserCreateRequest) (idg
 		Email:        email,
 		PasswordHash: string(passwordHash),
 		Role:         role,
-		Status:       1,
+		Status:       0,
 		IsSuperAdmin: req.IsSuperAdmin,
 		AvatarURL:    svc.randAvatarUrl(),
 		CreatedAt:    now,

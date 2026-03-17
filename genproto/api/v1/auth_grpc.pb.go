@@ -19,8 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AuthService_Token_FullMethodName  = "/lynx.api.v1.AuthService/Token"
-	AuthService_SignUp_FullMethodName = "/lynx.api.v1.AuthService/SignUp"
+	AuthService_Token_FullMethodName                 = "/lynx.api.v1.AuthService/Token"
+	AuthService_SignUp_FullMethodName                = "/lynx.api.v1.AuthService/SignUp"
+	AuthService_VerifySignUpEmail_FullMethodName     = "/lynx.api.v1.AuthService/VerifySignUpEmail"
+	AuthService_ResendSignUpEmailCode_FullMethodName = "/lynx.api.v1.AuthService/ResendSignUpEmailCode"
 )
 
 // AuthServiceClient is the client API for AuthService service.
@@ -29,6 +31,8 @@ const (
 type AuthServiceClient interface {
 	Token(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*TokenResponse, error)
 	SignUp(ctx context.Context, in *SignUpRequest, opts ...grpc.CallOption) (*SignUpResponse, error)
+	VerifySignUpEmail(ctx context.Context, in *VerifySignUpEmailRequest, opts ...grpc.CallOption) (*VerifySignUpEmailResponse, error)
+	ResendSignUpEmailCode(ctx context.Context, in *ResendSignUpEmailCodeRequest, opts ...grpc.CallOption) (*ResendSignUpEmailCodeResponse, error)
 }
 
 type authServiceClient struct {
@@ -59,12 +63,34 @@ func (c *authServiceClient) SignUp(ctx context.Context, in *SignUpRequest, opts 
 	return out, nil
 }
 
+func (c *authServiceClient) VerifySignUpEmail(ctx context.Context, in *VerifySignUpEmailRequest, opts ...grpc.CallOption) (*VerifySignUpEmailResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(VerifySignUpEmailResponse)
+	err := c.cc.Invoke(ctx, AuthService_VerifySignUpEmail_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) ResendSignUpEmailCode(ctx context.Context, in *ResendSignUpEmailCodeRequest, opts ...grpc.CallOption) (*ResendSignUpEmailCodeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ResendSignUpEmailCodeResponse)
+	err := c.cc.Invoke(ctx, AuthService_ResendSignUpEmailCode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility.
 type AuthServiceServer interface {
 	Token(context.Context, *TokenRequest) (*TokenResponse, error)
 	SignUp(context.Context, *SignUpRequest) (*SignUpResponse, error)
+	VerifySignUpEmail(context.Context, *VerifySignUpEmailRequest) (*VerifySignUpEmailResponse, error)
+	ResendSignUpEmailCode(context.Context, *ResendSignUpEmailCodeRequest) (*ResendSignUpEmailCodeResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -80,6 +106,12 @@ func (UnimplementedAuthServiceServer) Token(context.Context, *TokenRequest) (*To
 }
 func (UnimplementedAuthServiceServer) SignUp(context.Context, *SignUpRequest) (*SignUpResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SignUp not implemented")
+}
+func (UnimplementedAuthServiceServer) VerifySignUpEmail(context.Context, *VerifySignUpEmailRequest) (*VerifySignUpEmailResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method VerifySignUpEmail not implemented")
+}
+func (UnimplementedAuthServiceServer) ResendSignUpEmailCode(context.Context, *ResendSignUpEmailCodeRequest) (*ResendSignUpEmailCodeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ResendSignUpEmailCode not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 func (UnimplementedAuthServiceServer) testEmbeddedByValue()                     {}
@@ -138,6 +170,42 @@ func _AuthService_SignUp_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_VerifySignUpEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VerifySignUpEmailRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).VerifySignUpEmail(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_VerifySignUpEmail_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).VerifySignUpEmail(ctx, req.(*VerifySignUpEmailRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_ResendSignUpEmailCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ResendSignUpEmailCodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).ResendSignUpEmailCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_ResendSignUpEmailCode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).ResendSignUpEmailCode(ctx, req.(*ResendSignUpEmailCodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -152,6 +220,14 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SignUp",
 			Handler:    _AuthService_SignUp_Handler,
+		},
+		{
+			MethodName: "VerifySignUpEmail",
+			Handler:    _AuthService_VerifySignUpEmail_Handler,
+		},
+		{
+			MethodName: "ResendSignUpEmailCode",
+			Handler:    _AuthService_ResendSignUpEmailCode_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -2,6 +2,9 @@ package infra
 
 import (
 	"context"
+	"fmt"
+	"strings"
+	"text/template"
 
 	"github.com/lynx-go/lynx-clean-template/internal/domain/shared"
 	"github.com/lynx-go/lynx-clean-template/pkg/pubsub"
@@ -64,4 +67,56 @@ func (h *bcryptPasswordHasher) Compare(hashedPassword, password string) error {
 // NewPasswordHasher provides a shared.PasswordHasher backed by bcrypt.
 func NewPasswordHasher() shared.PasswordHasher {
 	return &bcryptPasswordHasher{}
+}
+
+// --- Email template renderer adapter ---
+
+type inMemoryEmailTemplateRenderer struct{}
+
+func (r *inMemoryEmailTemplateRenderer) Render(templateID string, vars map[string]string) (string, string, error) {
+	switch templateID {
+	case "signup_email_code":
+		subject := "Your verification code"
+		bodyTpl := "Your verification code is {{.code}}. It expires in {{.expires_minutes}} minutes."
+		body, err := renderTextTemplate(bodyTpl, vars)
+		if err != nil {
+			return "", "", err
+		}
+		return subject, body, nil
+	default:
+		return "", "", fmt.Errorf("unknown email template: %s", templateID)
+	}
+}
+
+func renderTextTemplate(tpl string, vars map[string]string) (string, error) {
+	parsed, err := template.New("email").Option("missingkey=error").Parse(tpl)
+	if err != nil {
+		return "", err
+	}
+	var b strings.Builder
+	if err := parsed.Execute(&b, vars); err != nil {
+		return "", err
+	}
+	return b.String(), nil
+}
+
+func NewEmailTemplateRenderer() shared.EmailTemplateRenderer {
+	return &inMemoryEmailTemplateRenderer{}
+}
+
+// --- Mock email sender adapter ---
+
+type mockEmailSender struct{}
+
+func (m *mockEmailSender) Send(ctx context.Context, msg shared.EmailMessage) error {
+	log.InfoContext(ctx, "mock email sent",
+		"to", msg.To,
+		"subject", msg.Subject,
+		"template_id", msg.TemplateID,
+	)
+	return nil
+}
+
+func NewEmailSender() shared.EmailSender {
+	return &mockEmailSender{}
 }

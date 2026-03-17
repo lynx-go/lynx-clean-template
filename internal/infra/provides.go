@@ -22,6 +22,8 @@ var ProviderSet = wire.NewSet(
 	NewDomainLogger,
 	NewDomainEventPublisher,
 	NewPasswordHasher,
+	NewEmailTemplateRenderer,
+	NewEmailSender,
 
 	bun.ProviderSet,
 )

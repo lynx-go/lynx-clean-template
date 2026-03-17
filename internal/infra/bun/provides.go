@@ -11,5 +11,6 @@ var ProviderSet = wire.NewSet(
 	bunrepo.NewGroupMembersRepo,
 	bunrepo.NewUsersRepo,
 	bunrepo.NewRefreshTokensRepo,
+	bunrepo.NewEmailVerificationCodesRepo,
 	bunrepo.NewFilesRepo,
 )
