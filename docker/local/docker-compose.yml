@@ -1,0 +1,61 @@
+name: lynx-compose
+
+services:
+  api-gateway:
+    # The official v3 Traefik docker image
+    image: traefik:v3.4
+    container_name: lynx-api-gateway
+    # Enables the web UI and tells Traefik to listen to docker
+    command: --api.insecure=true --providers.docker
+    restart: unless-stopped
+    ports:
+      # The HTTP port
+      - "88:80"
+      # The Web UI (enabled by --api.insecure=true)
+      - "89:8080"
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik.yaml:/etc/traefik/traefik.yaml
+      - ./traefik.d:/etc/traefik.d
+      - /etc/localtime:/etc/localtime
+    networks:
+      - lynx-local
+
+  postgres:
+    container_name: lynx-postgres
+    image: supabase/postgres:17.6.1.018
+    restart: unless-stopped
+    volumes:
+      - pg_data:/var/lib/postgresql
+      - /etc/localtime:/etc/localtime
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+#      - POSTGRES_DB=
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'postgres']
+    networks:
+      - lynx-local
+
+  redis:
+    image: "redis:6"
+    container_name: lynx-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass 123456
+    restart: unless-stopped
+    networks:
+      - lynx-local
+    volumes:
+      - /etc/localtime:/etc/localtime
+
+volumes:
+  pg_data:
+
+networks:
+  lynx-local:
+    name: lynx-local

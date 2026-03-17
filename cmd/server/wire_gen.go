@@ -8,14 +8,16 @@ package main
 
 import (
 	"github.com/lynx-go/lynx"
-	"github.com/lynx-go/lynx-app-template/internal/api/events"
-	"github.com/lynx-go/lynx-app-template/internal/api/http"
-	"github.com/lynx-go/lynx-app-template/internal/infra/clients"
-	"github.com/lynx-go/lynx-app-template/internal/infra/repoimpl"
-	"github.com/lynx-go/lynx-app-template/internal/infra/server"
-	"github.com/lynx-go/lynx-app-template/internal/usecase"
+	"github.com/lynx-go/lynx-clean-template/internal/api/eventhandler"
+	"github.com/lynx-go/lynx-clean-template/internal/api/grpc"
+	"github.com/lynx-go/lynx-clean-template/internal/app"
+	"github.com/lynx-go/lynx-clean-template/internal/domain/files"
+	"github.com/lynx-go/lynx-clean-template/internal/domain/users"
+	"github.com/lynx-go/lynx-clean-template/internal/infra"
+	"github.com/lynx-go/lynx-clean-template/internal/infra/bun/bunrepo"
+	"github.com/lynx-go/lynx-clean-template/internal/infra/clients"
+	"github.com/lynx-go/lynx-clean-template/internal/infra/server"
 	"github.com/lynx-go/lynx/boot"
-	"log/slog"
 )
 
 import (
@@ -24,36 +26,56 @@ import (
 
 // Injectors from wire.go:
 
-func wireBootstrap(app lynx.Lynx, slogger *slog.Logger) (*boot.Bootstrap, func(), error) {
-	pubSub := server.NewPubSub()
-	helloHandler := events.NewHelloHandler()
-	router := server.NewPubSubRouter(pubSub, helloHandler)
-	onStartHooks := NewOnStarts(router)
+func wireBootstrap(app2 lynx.Lynx) (*boot.Bootstrap, func(), error) {
+	onStartHooks := NewOnStarts()
 	onStopHooks := NewOnStops()
-	appConfig, err := NewConfig(app)
+	scheduler, err := server.NewScheduler()
 	if err != nil {
 		return nil, nil, err
 	}
-	helloAPI := http.NewHelloAPI(pubSub)
+	appConfig, err := NewAppConfig(app2)
+	if err != nil {
+		return nil, nil, err
+	}
+	binder := server.NewKafkaBinderForServer(appConfig)
+	broker := server.NewPubSub(binder)
+	helloHandler := eventhandler.NewHelloHandler()
+	router := server.NewPubSubRouter(broker, helloHandler)
+	validator := server.NewAuthValidator(appConfig)
 	dataClients, cleanup, err := clients.NewDataClients(appConfig)
 	if err != nil {
 		return nil, nil, err
 	}
-	usersRepo := repoimpl.NewUserRepo(dataClients)
-	runtimeVars := repoimpl.NewRuntimeVars(dataClients)
-	account := usecase.NewAccount(usersRepo, appConfig, runtimeVars)
-	accountAPI := http.NewAccountAPI(account)
-	echo := server.NewRouter(slogger, appConfig, helloAPI, accountAPI)
-	httpServer := server.NewHTTPServer(appConfig, echo)
-	scheduler, err := server.NewScheduler()
+	usersRepo := bunrepo.NewUsersRepo(dataClients)
+	refreshTokensRepo := bunrepo.NewRefreshTokensRepo(dataClients)
+	groupsRepo := bunrepo.NewGroupsRepo(dataClients)
+	passwordHasher := infra.NewPasswordHasher()
+	userService := users.NewUserService(usersRepo, passwordHasher, appConfig)
+	publisher := server.NewPublisher(broker)
+	eventPublisher := infra.NewDomainEventPublisher(publisher)
+	logger := infra.NewDomainLogger()
+	account := app.NewAccount(usersRepo, refreshTokensRepo, appConfig, groupsRepo, userService, eventPublisher, passwordHasher, logger)
+	authService := grpc.NewAuthService(account)
+	groups := app.NewGroups(groupsRepo)
+	groupsService := grpc.NewGroupsService(groups)
+	repoFiles := bunrepo.NewFilesRepo(dataClients)
+	urlRenderer := files.NewURLRenderer(appConfig, repoFiles)
+	appUsers := app.NewUsers(usersRepo, urlRenderer)
+	usersService := grpc.NewUsersService(appUsers)
+	grpcServer, err := server.NewGRPCServer(app2, appConfig, validator, authService, groupsService, usersService)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	binder := server.NewKafkaBinderForServer(pubSub, appConfig)
-	v := NewComponents(httpServer, scheduler, pubSub, binder)
-	v2 := NewComponentBuilders(binder)
-	bootstrap := boot.New(onStartHooks, onStopHooks, v, v2)
+	grpcGatewayServer, err := server.NewGRPCGatewayServer(app2, appConfig)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	v := NewComponents(scheduler, broker, binder, router, grpcServer, grpcGatewayServer)
+	v2 := NewComponentBuilders()
+	componentBuilderSetFunc := NewComponentBuilderSetFunc(binder)
+	bootstrap := boot.New(onStartHooks, onStopHooks, v, v2, componentBuilderSetFunc)
 	return bootstrap, func() {
 		cleanup()
 	}, nil

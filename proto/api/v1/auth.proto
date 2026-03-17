@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package lynx.api.v1;
+
+option go_package = "github.com/lynx-go/lynx-clean-template/genproto/api/v1;apipb";
+
+import "shared/error.proto";
+import "shared/user.proto";
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+service AuthService {
+  rpc Token(TokenRequest) returns (TokenResponse) {
+    option (google.api.http) = {
+      post: "/v1/token"
+      body: "*"
+    };
+  }
+
+  rpc SignUp(SignUpRequest) returns (SignUpResponse) {
+    option (google.api.http) = {
+      post: "/v1/signUp"
+      body: "*"
+    };
+
+  }
+}
+
+message TokenRequest {
+  string grant_type = 1;
+  string username = 2;
+  string email = 3;
+  string phone = 4;
+  string password = 5;
+  string refresh_token = 6;
+}
+
+message AuthorizePasswordRequest {
+  string username = 1;
+  string email = 2[(buf.validate.field).string.email = true];
+  string phone = 3;
+  string password = 4;
+}
+
+
+message TokenResponse {
+  string token = 3;
+  int64 expires_at = 4;
+  string refresh_token = 5;
+  int64 refresh_token_expires_at = 6;
+  lynx.shared.User user_info = 7;
+}
+
+
+
+message RefreshTokenRequest {
+  string refresh_token = 1;
+}
+
+message SignUpRequest {
+  string username = 1;
+  string email = 2;
+  string phone = 3;
+  string password = 4;
+  map<string, string> data = 5;
+}
+
+message SignUpResponse {
+  lynx.shared.User user_info = 3;
+}

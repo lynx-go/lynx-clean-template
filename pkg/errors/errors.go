@@ -2,6 +2,7 @@ package errors
 
 import (
 	"fmt"
+	"net/http"
 )
 
 func New(code int, message string) *APIError {
@@ -11,27 +12,34 @@ func New(code int, message string) *APIError {
 	}
 }
 
-func FromError(err error) *APIError {
+func Cause(message string) *APIError {
+	return New(http.StatusInternalServerError, message)
+}
+
+func Wrap(err error, message string) *APIError {
 	return &APIError{
-		Code:    -1,
-		Message: err.Error(),
-		err:     err,
+		Code:    http.StatusInternalServerError,
+		Message: message,
+		Details: []string{
+			err.Error(),
+		},
+		err: err,
 	}
 }
 
 type APIError struct {
-	Code    int            `json:"code"`
-	Message string         `json:"message"`
-	Details map[string]any `json:"details,omitempty"`
+	Code    int      `json:"code"`
+	Message string   `json:"message"`
+	Details []string `json:"details,omitempty"`
 	err     error
 }
 
 func (e *APIError) Wrap(err error) *APIError {
 	e.err = err
 	if e.Details == nil {
-		e.Details = make(map[string]any)
+		e.Details = []string{}
 	}
-	e.Details["internal"] = err.Error()
+	e.Details = append(e.Details, e.err.Error())
 	return e
 }
 
@@ -45,7 +53,26 @@ type ErrorItem struct {
 }
 
 func (e *APIError) Error() string {
-	return fmt.Sprintf("%d: %s", e.Code, e.Message)
+	return fmt.Sprintf("%d %s", e.Code, e.Message)
 }
 
 var _ error = new(APIError)
+
+type StatusError struct {
+	*APIError
+	Status int `json:"code"`
+}
+
+func (e *StatusError) Error() string {
+	return fmt.Sprintf("[status=%d] %s", e.Status, e.APIError.Error())
+}
+
+func NewStatusError(status int, message string) *StatusError {
+	return &StatusError{
+		Status: status,
+		APIError: &APIError{
+			Code:    status,
+			Message: message,
+		},
+	}
+}

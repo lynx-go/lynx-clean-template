@@ -1,0 +1,58 @@
+http:
+  routers:
+    lynx-api-public:
+      entryPoints:
+        - "web"
+      rule: "(Path(`/`) || Path(`/v1/token`) || Path(`/v1/sign-up`))"
+      service: lynx-api
+      middlewares:
+        - cors
+    #        - remove-forward-auth-header
+
+    lynx-api-protected:
+      entryPoints:
+        - "web"
+      rule: "(PathPrefix(`/api`))"
+      service: lynx-api
+      middlewares:
+        - cors
+    #        - remove-forward-auth-header
+    #        - forward-auth
+
+    lynx-developer-api:
+      entryPoints:
+        - "web"
+      rule: "(PathPrefix(`/developer`))"
+      service: lynx-api
+      middlewares:
+        - cors
+  #        - remove-forward-auth-header
+
+  services:
+    lynx-api:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:9099"
+
+  middlewares:
+    forward-auth:
+      forwardAuth:
+        address: "http://host.docker.internal:9099/check-auth"
+        authResponseHeaders: [ "X-Forwarded-User" ]
+
+    remove-forward-auth-header:
+      headers:
+        customRequestHeaders:
+          X-Forwarded-User: ""
+
+    cors:
+      headers:
+        accessControlAllowMethods:
+          - "GET"
+          - "POST"
+          - "OPTIONS"
+        accessControlAllowHeaders: "*"
+        accessControlAllowOriginList:
+          - "*"
+        accessControlMaxAge: 100
+        addVaryHeader: true

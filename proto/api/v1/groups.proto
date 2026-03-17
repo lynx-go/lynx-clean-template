@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+// buf:lint:ignore PACKAGE_DIRECTORY_MATCH
+package lynx.api.v1;
+
+option go_package = "github.com/lynx-go/lynx-clean-template/genproto/api/v1;apipb";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "buf/validate/validate.proto";
+
+
+service GroupsService {
+  // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+  // buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
+  rpc CreateGroup(CreateGroupRequest) returns (Group) {
+    option (google.api.http) = {
+      post: "/v1/groups"
+      body: "*"
+    };
+  };
+
+  // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+  // buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
+  rpc GetGroup(GetGroupRequest) returns (Group) {
+    option (google.api.http) = {
+      get: "/v1/groups/{group_id}"
+    };
+  }
+
+  rpc ListGroups(ListGroupsRequest) returns (ListGroupsResponse) {
+    option (google.api.http) = {
+      get: "/v1/groups"
+    };
+  }
+
+  // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+  // buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
+  rpc UpdateGroup(UpdateGroupRequest) returns (Group) {
+    option (google.api.http) = {
+      patch: "/v1/groups/{group_id}"
+      body: "*"
+    };
+  }
+
+  rpc DeleteGroup(DeleteGroupRequest) returns (DeleteGroupResponse) {
+    option (google.api.http) = {
+      delete: "/v1/groups/{group_id}"
+    };
+  }
+}
+
+message Group {
+  string id = 1;
+  string name = 2;
+  string display_name = 3;
+  string icon = 4;
+  string description = 5;
+  string plan = 6;
+  string created_by = 7;
+  google.protobuf.Timestamp created_at = 8;
+  string updated_by = 9;
+  google.protobuf.Timestamp updated_at = 10;
+}
+
+message GetGroupRequest {
+  string group_id = 1 [(buf.validate.field).required = true];
+}
+
+message ListGroupsRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+  string filter = 3;
+  string order_by = 4;
+}
+
+message ListGroupsResponse {
+  repeated Group items = 1;
+  string next_page_token = 2;
+  int32 total_size = 3;
+}
+
+message CreateGroupRequest {
+  string name = 1 [(buf.validate.field).required = true];
+  string display_name = 2;
+  string icon = 3;
+  string description = 4;
+}
+
+message UpdateGroupRequest {
+  string group_id = 1 [(buf.validate.field).required = true];
+  optional string display_name = 2;
+  optional string icon = 3;
+  optional string description = 4;
+}
+
+message DeleteGroupRequest {
+  string group_id = 1 [(buf.validate.field).required = true];
+}
+
+message DeleteGroupResponse {}

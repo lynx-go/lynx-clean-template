@@ -3,15 +3,17 @@ package main
 import (
 	"github.com/google/wire"
 	"github.com/lynx-go/lynx"
-	"github.com/lynx-go/lynx-app-template/internal/api"
-	"github.com/lynx-go/lynx-app-template/internal/infra"
-	configpb "github.com/lynx-go/lynx-app-template/internal/pkg/config"
-	"github.com/lynx-go/lynx-app-template/internal/usecase"
-	"github.com/lynx-go/lynx-app-template/pkg/pubsub"
+	"github.com/lynx-go/lynx-clean-template/internal/api"
+	"github.com/lynx-go/lynx-clean-template/internal/app"
+	"github.com/lynx-go/lynx-clean-template/internal/domain"
+	"github.com/lynx-go/lynx-clean-template/internal/infra"
+	"github.com/lynx-go/lynx-clean-template/internal/infra/server"
+	config "github.com/lynx-go/lynx-clean-template/internal/pkg/config"
+	"github.com/lynx-go/lynx-clean-template/pkg/pubsub"
 	"github.com/lynx-go/lynx/boot"
 	"github.com/lynx-go/lynx/contrib/kafka"
 	"github.com/lynx-go/lynx/contrib/schedule"
-	"github.com/lynx-go/lynx/server/http"
+	"github.com/lynx-go/lynx/server/grpc"
 )
 
 //go:generate wire
@@ -19,18 +21,23 @@ import (
 var ProviderSet = wire.NewSet(
 	boot.New,
 	api.ProviderSet,
-	usecase.ProviderSet,
+	app.ProviderSet,
 	infra.ProviderSet,
+	domain.ProviderSet,
+
+	server.NewKafkaBinderForServer,
+
 	NewComponents,
 	NewComponentBuilders,
+	NewComponentBuilderSetFunc,
 	NewOnStarts,
 	NewOnStops,
 	NewHealthChecks,
-	NewConfig,
+	NewAppConfig,
 )
 
-func NewConfig(app lynx.Lynx) (*configpb.AppConfig, error) {
-	var c configpb.AppConfig
+func NewAppConfig(app lynx.Lynx) (*config.AppConfig, error) {
+	var c config.AppConfig
 	if err := app.Config().Unmarshal(&c, lynx.TagNameJSON); err != nil {
 		return nil, err
 	}
@@ -42,25 +49,25 @@ func NewHealthChecks(app lynx.Lynx) lynx.HealthCheckFunc {
 }
 
 func NewComponents(
-	httpServer *http.Server,
 	scheduler *schedule.Scheduler,
-	broker *pubsub.PubSub,
-	binder *kafka.Binder,
+	pubSubBroker *pubsub.Broker,
+	pubSubBinder *kafka.Binder,
+	pubSubRouter *pubsub.Router,
+	grpcServer *grpc.Server,
+	grpcGatewayServer *server.GRPCGatewayServer,
 ) []lynx.Component {
 	return []lynx.Component{
 		scheduler,
-		broker,
-		httpServer,
-		binder,
+		pubSubBroker,
+		grpcGatewayServer,
+		pubSubRouter,
+		pubSubBinder,
+		grpcServer,
 	}
 }
 
-func NewOnStarts(
-	router *pubsub.Router,
-) lynx.OnStartHooks {
-	hooks := lynx.OnStartHooks{
-		router.Run,
-	}
+func NewOnStarts() lynx.OnStartHooks {
+	hooks := lynx.OnStartHooks{}
 	return hooks
 }
 
@@ -69,10 +76,15 @@ func NewOnStops() lynx.OnStopHooks {
 	return hooks
 }
 
-func NewComponentBuilders(
-	binder *kafka.Binder,
-) []lynx.ComponentBuilder {
-	builders := []lynx.ComponentBuilder{}
-	builders = append(builders, binder.Builders()...)
+func NewComponentBuilders() []lynx.ComponentBuilder {
+	var builders []lynx.ComponentBuilder
 	return builders
+}
+
+func NewComponentBuilderSetFunc(
+	binder *kafka.Binder,
+) lynx.ComponentBuilderSetFunc {
+	return func() lynx.ComponentBuilderSet {
+		return binder.ConsumerBuilders()
+	}
 }

@@ -1,19 +1,23 @@
 syntax = "proto3";
 
-package lynx.config;
+package skyline.api.config;
 
-option go_package = "github.com/lynx-go/lynx-app-template/internal/pkg/config;configpb";
+option go_package = "github.com/lynx-go/lynx-clean-template/internal/pkg/config";
 
 message AppConfig {
   Server server = 1;
   Data data = 2;
   PubSub pubsub = 3;
   Security security = 4;
+  File file = 5;
+  App app = 6;
 }
-
 
 message Server {
   Http http = 1;
+  GRPC grpc = 2;
+  Http ai_gateway = 3;
+  GRPC messageloop_grpc = 4;
 }
 
 message Security {
@@ -26,6 +30,10 @@ message Security {
   Jwt jwt = 1;
 }
 
+message GRPC {
+  string addr = 1;
+  string timeout = 2;
+}
 
 message Http {
 
@@ -79,15 +87,45 @@ message Kafka {
     int32 start_offset = 2;
     int32 instances = 3;
     bool log_message = 4;
+    string mapped_event = 5;
   }
 
   message Producer {
     int32 acks = 1;
     bool log_message = 2;
+    int32 batch_size = 3;
+    string batch_timeout = 4;
+    string mapped_event = 5;
+    bool async = 6;
   }
 
   repeated string brokers = 1;
   string topic = 2;
   Consumer consumer = 3;
   Producer producer = 4;
+}
+
+message File {
+  message Bucket {
+    string endpoint = 1;
+    string bucket_name = 2;
+    string access_key_id = 3;
+    string access_key_secret = 4;
+    string region_name = 5;
+    string url = 6;
+    string base_path = 7;
+    string exposed_url = 10;
+    repeated string include_categories = 11;
+    map<string, string> file_path_templates = 12;
+  }
+
+  map<string, Bucket> buckets = 1;
+}
+
+message App {
+  User user = 1;
+}
+
+message User {
+  repeated string default_avatar_urls = 1;
 }

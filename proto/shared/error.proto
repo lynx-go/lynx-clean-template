@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+// buf:lint:ignore PACKAGE_DIRECTORY_MATCH
+package lynx.shared;
+
+import "google/protobuf/struct.proto";
+
+option go_package = "github.com/lynx-go/lynx-clean-template/genproto/shared;sharedpb";
+
+message Error {
+  string code = 1;
+  string type = 2;
+  string message = 3;
+  google.protobuf.Struct params = 4;
+  repeated string details = 5;
+}
+
+message ErrorResponse {
+  Error error = 1;
+}
