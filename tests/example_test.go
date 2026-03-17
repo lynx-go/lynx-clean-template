@@ -10,7 +10,6 @@ func TestExample(t *testing.T) {
 	RunTestSuite(func(ctx context.Context, ts *TestingSuite) error {
 		// 这里可以使用 ts.Collections 进行测试
 		t.Log("Testing suite initialized successfully")
-		t.Logf("Collections: %v", ts.Collections != nil)
 		return nil
 	})
 }
