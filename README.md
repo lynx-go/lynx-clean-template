@@ -131,7 +131,136 @@ genproto/       # generated protobuf code
 db/migrations/  # database migrations
 ```
 
-## 9) Known Template Notes / 模板注意事项
+## 9) New Module Template / 新模块开发模板
+
+用于快速新增一个业务模块（例如 `orders`、`products`），保持与当前 DDD/Clean 分层一致。
+
+Use this template to add a new business module (e.g., `orders`, `products`) while keeping the current DDD/Clean layering.
+
+### 9.1 Layer Flow / 分层流转
+
+`api handler` -> `app use-case` -> `domain port` -> `infra adapter`
+
+### 9.2 Domain Port (interface) / 领域端口
+
+`internal/domain/<module>/repo/<module>.go`
+
+```go
+package repo
+
+import "context"
+
+type Entity struct {
+	ID string
+}
+
+type Repository interface {
+	Create(ctx context.Context, e *Entity) error
+	GetByID(ctx context.Context, id string) (*Entity, error)
+}
+```
+
+### 9.3 Infra Adapter (implementation) / 基础设施适配器
+
+`internal/infra/bun/bunrepo/<module>.go`
+
+```go
+package bunrepo
+
+import (
+	"context"
+
+	domainrepo "github.com/lynx-go/lynx-clean-template/internal/domain/<module>/repo"
+)
+
+type ModuleRepo struct {
+	// inject bun.DB or query builder here
+}
+
+func NewModuleRepo() domainrepo.Repository {
+	return &ModuleRepo{}
+}
+
+func (r *ModuleRepo) Create(ctx context.Context, e *domainrepo.Entity) error {
+	// persist with Bun
+	return nil
+}
+
+func (r *ModuleRepo) GetByID(ctx context.Context, id string) (*domainrepo.Entity, error) {
+	// query with Bun
+	return &domainrepo.Entity{ID: id}, nil
+}
+```
+
+### 9.4 App Use-case / 应用用例层
+
+`internal/app/<module>.go`
+
+```go
+package app
+
+import (
+	"context"
+
+	domainrepo "github.com/lynx-go/lynx-clean-template/internal/domain/<module>/repo"
+)
+
+type Module struct {
+	repo domainrepo.Repository
+}
+
+func NewModule(repo domainrepo.Repository) *Module {
+	return &Module{repo: repo}
+}
+
+func (m *Module) Create(ctx context.Context, id string) error {
+	return m.repo.Create(ctx, &domainrepo.Entity{ID: id})
+}
+```
+
+### 9.5 API Handler / 接口层
+
+`internal/api/grpc/<module>.go`
+
+```go
+package grpc
+
+import (
+	"context"
+
+	"github.com/lynx-go/lynx-clean-template/internal/app"
+)
+
+type ModuleService struct {
+	uc *app.Module
+}
+
+func NewModuleService(uc *app.Module) *ModuleService {
+	return &ModuleService{uc: uc}
+}
+
+func (s *ModuleService) Create(ctx context.Context /* req */) (/* resp */ any, error) {
+	if err := s.uc.Create(ctx, "new-id"); err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+```
+
+### 9.6 Wiring Checklist / 注入与注册清单
+
+- 在 `internal/domain/provides.go` 暴露 domain provider（如需要）。
+- 在 `internal/infra/provides.go` 注入 adapter constructor（例如 `bunrepo.NewModuleRepo`）。
+- 在 `internal/app/provides.go` 注入 use-case constructor（例如 `app.NewModule`）。
+- 在 `internal/api/provides.go` 注入 handler constructor（例如 `grpc.NewModuleService`）。
+- 在 server gRPC / gateway 注册新服务后，执行：
+
+```pwsh
+task wire
+task generate:proto
+```
+
+## 10) Known Template Notes / 模板注意事项
 
 - `Taskfile.yml` 中个别历史命令描述可能与当前 CLI 示例命令不完全一致；请以 `cmd/cli/cmd/*` 实际实现为准。
 - `docker/local/docker-compose.yml` 提供了 Postgres 与 Redis；Kafka 需按你的环境单独准备。
