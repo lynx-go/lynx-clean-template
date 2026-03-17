@@ -15,21 +15,21 @@ server:
 
 security:
   jwt:
-    secret: "" # env: SKYLINE_SECURITY_JWT_SECRET
+    secret: "" # env: LYNX_SECURITY_JWT_SECRET
     token_expiry_sec: 3600
-    refresh_token_secret: "" # env: SKYLINE_SECURITY_JWT_REFRESH_TOKEN_SECRET
+    refresh_token_secret: "" # env: LYNX_SECURITY_JWT_REFRESH_TOKEN_SECRET
     refresh_token_expiry_sec: 3600
 
 data:
   database:
     driver: pgx
     dialect: postgres
-    source: "" # env: SKYLINE_DATA_DATABASE_SOURCE
+    source: "" # env: LYNX_DATA_DATABASE_SOURCE
     debug: true
 
   redis:
     addr: 127.0.0.1:6379
-    password: "" # env: SKYLINE_DATA_REDIS_PASSWORD
+    password: "" # env: LYNX_DATA_REDIS_PASSWORD
     db: 0
 
 
@@ -53,8 +53,8 @@ file:
     default:
       bucket_name:
       endpoint:
-      access_key_id: "" # env: SKYLINE_FILE_BUCKETS_DEFAULT_ACCESS_KEY_ID
-      access_key_secret: "" # env: SKYLINE_FILE_BUCKETS_DEFAULT_ACCESS_KEY_SECRET
+      access_key_id: "" # env: LYNX_FILE_BUCKETS_DEFAULT_ACCESS_KEY_ID
+      access_key_secret: "" # env: LYNX_FILE_BUCKETS_DEFAULT_ACCESS_KEY_SECRET
       region_name: auto
       exposed_url:
       include_categories:

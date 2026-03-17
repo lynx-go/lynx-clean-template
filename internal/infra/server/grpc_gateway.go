@@ -9,6 +9,7 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/lynx-go/lynx"
+	apipb "github.com/lynx-go/lynx-clean-template/genproto/api/v1"
 	"github.com/lynx-go/lynx-clean-template/internal/pkg/config"
 	lynxhttp "github.com/lynx-go/lynx/server/http"
 	"google.golang.org/grpc"
@@ -54,7 +55,15 @@ func NewGRPCGatewayServer(
 	)
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 
-	if err := registerGrpcEndpoints(ctx, mux, grpcEndpoint, opts); err != nil {
+	if err := registerGrpcEndpoints(
+		ctx,
+		mux,
+		grpcEndpoint,
+		opts,
+		apipb.RegisterAuthServiceHandlerFromEndpoint,
+		apipb.RegisterGroupsServiceHandlerFromEndpoint,
+		apipb.RegisterUsersServiceHandlerFromEndpoint,
+	); err != nil {
 		return nil, err
 	}
 

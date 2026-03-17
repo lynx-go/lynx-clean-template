@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const EnvPrefix = "lynx"
+const EnvPrefix = "LYNX"
 
 var envBoundKeys = []string{
 	"security.jwt.secret",

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/lynx-go/lynx-clean-template/internal/pkg/contexts"
 	"github.com/lynx-go/lynx-clean-template/pkg/jwtparser"
 	"github.com/samber/lo"
 	"google.golang.org/grpc"
@@ -57,7 +58,9 @@ func (i *AuthInterceptor) UnaryAuthMiddleware(ctx context.Context, req any, info
 		return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("invalid token: %v", err))
 	}
 
-	// add our user ID to the context, so we can use it in our RPC handler
+	// Inject canonical key consumed by app/contexts helpers.
+	ctx = context.WithValue(ctx, contexts.ContextKeyCurrentUser, userID)
+	// Keep legacy key during migration to avoid breaking older call paths.
 	ctx = context.WithValue(ctx, "_USER", userID)
 
 	// call our handler

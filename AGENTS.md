@@ -19,17 +19,16 @@
 
 ## Config and Environment Conventions
 - Config schema is proto-defined in `internal/pkg/config/config.proto`; runtime binding is in `internal/pkg/config/bind.go`.
-- Environment override prefix is `SKYLINE_`; keys map from dotted paths (for example `data.database.source` -> `SKYLINE_DATA_DATABASE_SOURCE`).
+- Environment override prefix is `LYNX_`; keys map from dotted paths (for example `data.database.source` -> `LYNX_DATA_DATABASE_SOURCE`).
 - `cmd/server/main.go` loads `.env` opportunistically via `godotenv`, then binds config from `./configs` by default.
 - Use `configs/config.yaml.template` as the baseline and keep secrets in env vars for keys listed in `envBoundKeys` (`internal/pkg/config/bind.go`).
 
 ## Patterns to Follow When Editing
 - Keep ports in domain and adapters in infra (example: `internal/domain/shared/event_publisher.go` + infra adapter in `internal/infra/domain_adapters.go`).
 - Reuse `pkg/crud` list/filter/order abstractions in repo adapters (see `internal/infra/bun/bunrepo/users.go`) instead of ad-hoc SQL query parsing.
-- File references are resolved through `files.URLRenderer` (`internal/domain/files/url_renderer.go`): support `http(s)://`, `bucket://`, and `catalog://id/...` forms.
+- File URL resolution is consumed via `shared.FileURLResolver` (`internal/domain/shared/resource_url_resolver.go`) and implemented in `internal/domain/files/url_renderer.go`; support `http(s)://`, `bucket://`, and `catalog://id/...` forms.
 - HTTP error shape for grpc-gateway is customized in `internal/infra/server/errors.go`; keep API errors compatible with that mapping.
 
 ## Known Template Drift / Checks
 - `Taskfile.yml` still references CLI commands `create-user` and `gen-api-key`, but current `cmd/cli/cmd/*` exposes commands like `hello` and `print-config`; verify task targets before relying on them.
-- `internal/infra/server/grpc_gateway.go` currently calls `registerGrpcEndpoints(...)` with no registration funcs; add generated `Register*HandlerFromEndpoint` funcs when exposing REST endpoints.
 

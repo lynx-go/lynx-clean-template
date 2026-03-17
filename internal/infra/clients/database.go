@@ -96,7 +96,7 @@ func (d *DataClients) GetBunDB() *bun.DB {
 func validateDatabaseSource(source string) error {
 	source = strings.TrimSpace(source)
 	if source == "" {
-		return fmt.Errorf("database dsn is empty: set data.database.source or SKYLINE_DATA_DATABASE_SOURCE")
+		return fmt.Errorf("database dsn is empty: set data.database.source or LYNX_DATA_DATABASE_SOURCE")
 	}
 
 	u, err := url.Parse(source)

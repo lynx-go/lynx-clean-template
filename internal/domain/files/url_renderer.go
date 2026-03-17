@@ -6,36 +6,9 @@ import (
 	"strings"
 
 	"github.com/lynx-go/lynx-clean-template/internal/domain/files/repo"
+	"github.com/lynx-go/lynx-clean-template/internal/domain/shared"
 	"github.com/lynx-go/lynx-clean-template/internal/pkg/config"
 )
-
-// URLRenderer converts file references to accessible URLs.
-// Supports three formats:
-// - http:// or https:// - returned as-is
-// - bucket://{bucket_name}/{file_path} - uses bucket's exposed_url + path
-// - catalog://id/{file_id} - looks up files, then generates URL
-// - plain path (no scheme) - uses default bucket's exposed_url + path
-type URLRenderer interface {
-	// Render converts a file reference to an accessible URL.
-	// Returns the original value if it's already an HTTP URL or if conversion fails.
-	Render(ctx context.Context, ref string) string
-
-	// RenderWithContext converts a file reference with explicit default bucket.
-	// If ref has no scheme, uses the provided defaultBucket.
-	RenderWithContext(ctx context.Context, ref string, defaultBucket string) string
-
-	// RenderBatch converts multiple file references in a single call.
-	// More efficient for catalog://id/ references as it batches database queries.
-	RenderBatch(ctx context.Context, refs []string) map[string]string
-
-	// FormatCatalogRef generates a catalog reference expression from a file ID.
-	// Returns: "catalog://id/{fileID}"
-	FormatCatalogRef(fileID string) string
-
-	// FormatBucketRef generates a bucket reference expression from bucket and file path.
-	// Returns: "bucket://{bucket}/{filePath}"
-	FormatBucketRef(bucket, filePath string) string
-}
 
 type urlRenderer struct {
 	configs map[string]*config.File_Bucket // bucket name -> config
@@ -43,7 +16,7 @@ type urlRenderer struct {
 }
 
 // NewURLRenderer creates a new URLRenderer instance.
-func NewURLRenderer(config *config.AppConfig, repo repo.Files) URLRenderer {
+func NewURLRenderer(config *config.AppConfig, repo repo.Files) shared.FileURLResolver {
 	return &urlRenderer{
 		configs: config.GetFile().GetBuckets(),
 		repo:    repo,
@@ -180,22 +153,4 @@ func (r *urlRenderer) renderSingleWithCache(ctx context.Context, ref string, fil
 	}
 
 	return r.renderBucketURL(defaultBucket, ref, ref)
-}
-
-// FormatCatalogRef generates a catalog reference expression from a file ID.
-// Returns: "catalog://id/{fileID}"
-func (r *urlRenderer) FormatCatalogRef(fileID string) string {
-	if fileID == "" {
-		return ""
-	}
-	return "catalog://id/" + fileID
-}
-
-// FormatBucketRef generates a bucket reference expression from bucket and file path.
-// Returns: "bucket://{bucket}/{filePath}"
-func (r *urlRenderer) FormatBucketRef(bucket, filePath string) string {
-	if bucket == "" || filePath == "" {
-		return ""
-	}
-	return "bucket://" + bucket + "/" + filePath
 }

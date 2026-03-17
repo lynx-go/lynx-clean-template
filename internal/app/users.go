@@ -6,7 +6,7 @@ import (
 
 	apipb "github.com/lynx-go/lynx-clean-template/genproto/api/v1"
 	sharedpb "github.com/lynx-go/lynx-clean-template/genproto/shared"
-	"github.com/lynx-go/lynx-clean-template/internal/domain/files"
+	"github.com/lynx-go/lynx-clean-template/internal/domain/shared"
 	"github.com/lynx-go/lynx-clean-template/internal/domain/users/repo"
 	"github.com/lynx-go/lynx-clean-template/internal/pkg/contexts"
 	apierrors "github.com/lynx-go/lynx-clean-template/pkg/errors"
@@ -48,7 +48,7 @@ func toColumnNames(paths []string) []string {
 
 func NewUsers(
 	usersRepo repo.UsersRepo,
-	urlRenderer files.URLRenderer,
+	urlRenderer shared.FileURLResolver,
 ) *Users {
 	return &Users{
 		usersRepo:   usersRepo,
@@ -58,7 +58,7 @@ func NewUsers(
 
 type Users struct {
 	usersRepo   repo.UsersRepo
-	urlRenderer files.URLRenderer
+	urlRenderer shared.FileURLResolver
 }
 
 // GetUserProfile returns a user's profile by ID
@@ -181,7 +181,7 @@ func (uc *Users) UpdateMyProfile(ctx context.Context, req *apipb.UpdateMyProfile
 }
 
 // toUserProfile converts repo.User to apipb.UserProfile
-func toUserProfile(ctx context.Context, v *repo.User, urlRenderer files.URLRenderer) *apipb.UserProfile {
+func toUserProfile(ctx context.Context, v *repo.User, urlRenderer shared.FileURLResolver) *apipb.UserProfile {
 	// Render avatar URL through URLRenderer
 	avatarURL := urlRenderer.Render(ctx, v.AvatarURL)
 
