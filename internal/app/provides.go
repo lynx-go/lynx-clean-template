@@ -8,4 +8,5 @@ var ProviderSet = wire.NewSet(
 	NewAccount,
 	NewGroups,
 	NewUsers,
+	NewFiles,
 )
