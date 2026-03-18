@@ -16,6 +16,74 @@
     "application/json"
   ],
   "paths": {
+    "/v1/admin/users/{userId}/super-admin": {
+      "delete": {
+        "summary": "RevokeSuperAdmin revokes super admin privilege from the target user.\nRequires the caller to be a super admin. Fails if target is the last super admin.\nbuf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE",
+        "operationId": "UsersService_RevokeSuperAdmin",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UserProfile"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "UsersService"
+        ]
+      },
+      "post": {
+        "summary": "GrantSuperAdmin grants super admin privilege to the target user.\nRequires the caller to be a super admin.\nbuf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE",
+        "operationId": "UsersService_GrantSuperAdmin",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UserProfile"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UsersServiceGrantSuperAdminBody"
+            }
+          }
+        ],
+        "tags": [
+          "UsersService"
+        ]
+      }
+    },
     "/v1/users/-/profile": {
       "patch": {
         "summary": "UpdateMyProfile updates the authenticated user's profile\nbuf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE",
@@ -82,6 +150,10 @@
     }
   },
   "definitions": {
+    "UsersServiceGrantSuperAdminBody": {
+      "type": "object",
+      "description": "GrantSuperAdminRequest contains the target user ID to grant super admin."
+    },
     "protobufAny": {
       "type": "object",
       "properties": {

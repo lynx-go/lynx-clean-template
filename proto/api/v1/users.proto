@@ -11,6 +11,7 @@ import "google/protobuf/timestamp.proto";
 import "buf/validate/validate.proto";
 
 // UsersService provides operations for the authenticated user to manage their own profile.
+// Super admin operations (GrantSuperAdmin / RevokeSuperAdmin) require the caller to be a super admin.
 service UsersService {
   // UpdateMyProfile updates the authenticated user's profile
   // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
@@ -27,6 +28,25 @@ service UsersService {
   rpc GetUserProfile(GetUserProfileRequest) returns (UserProfile) {
     option (google.api.http) = {
       get: "/v1/users/{user_id}/profile"
+    };
+  }
+
+  // GrantSuperAdmin grants super admin privilege to the target user.
+  // Requires the caller to be a super admin.
+  // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+  rpc GrantSuperAdmin(GrantSuperAdminRequest) returns (UserProfile) {
+    option (google.api.http) = {
+      post: "/v1/admin/users/{user_id}/super-admin"
+      body: "*"
+    };
+  }
+
+  // RevokeSuperAdmin revokes super admin privilege from the target user.
+  // Requires the caller to be a super admin. Fails if target is the last super admin.
+  // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+  rpc RevokeSuperAdmin(RevokeSuperAdminRequest) returns (UserProfile) {
+    option (google.api.http) = {
+      delete: "/v1/admin/users/{user_id}/super-admin"
     };
   }
 }
@@ -63,3 +83,14 @@ message UpdateMyProfileRequest {
 message GetUserProfileRequest {
   string user_id = 1 [(buf.validate.field).required = true];
 }
+
+// GrantSuperAdminRequest contains the target user ID to grant super admin.
+message GrantSuperAdminRequest {
+  string user_id = 1 [(buf.validate.field).required = true];
+}
+
+// RevokeSuperAdminRequest contains the target user ID to revoke super admin.
+message RevokeSuperAdminRequest {
+  string user_id = 1 [(buf.validate.field).required = true];
+}
+

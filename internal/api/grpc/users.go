@@ -20,6 +20,14 @@ func (svc *UsersService) UpdateMyProfile(ctx context.Context, req *apipb.UpdateM
 	return svc.uc.UpdateMyProfile(ctx, req)
 }
 
+func (svc *UsersService) GrantSuperAdmin(ctx context.Context, req *apipb.GrantSuperAdminRequest) (*apipb.UserProfile, error) {
+	return svc.uc.GrantSuperAdmin(ctx, req)
+}
+
+func (svc *UsersService) RevokeSuperAdmin(ctx context.Context, req *apipb.RevokeSuperAdminRequest) (*apipb.UserProfile, error) {
+	return svc.uc.RevokeSuperAdmin(ctx, req)
+}
+
 func NewUsersService(
 	uc *app.Users,
 ) *UsersService {

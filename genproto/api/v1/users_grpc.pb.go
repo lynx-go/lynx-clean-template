@@ -19,8 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UsersService_UpdateMyProfile_FullMethodName = "/lynx.api.v1.UsersService/UpdateMyProfile"
-	UsersService_GetUserProfile_FullMethodName  = "/lynx.api.v1.UsersService/GetUserProfile"
+	UsersService_UpdateMyProfile_FullMethodName  = "/lynx.api.v1.UsersService/UpdateMyProfile"
+	UsersService_GetUserProfile_FullMethodName   = "/lynx.api.v1.UsersService/GetUserProfile"
+	UsersService_GrantSuperAdmin_FullMethodName  = "/lynx.api.v1.UsersService/GrantSuperAdmin"
+	UsersService_RevokeSuperAdmin_FullMethodName = "/lynx.api.v1.UsersService/RevokeSuperAdmin"
 )
 
 // UsersServiceClient is the client API for UsersService service.
@@ -28,6 +30,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
 // UsersService provides operations for the authenticated user to manage their own profile.
+// Super admin operations (GrantSuperAdmin / RevokeSuperAdmin) require the caller to be a super admin.
 type UsersServiceClient interface {
 	// UpdateMyProfile updates the authenticated user's profile
 	// buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
@@ -36,6 +39,14 @@ type UsersServiceClient interface {
 	// When user_id is "-", returns the authenticated user's profile
 	// buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
 	GetUserProfile(ctx context.Context, in *GetUserProfileRequest, opts ...grpc.CallOption) (*UserProfile, error)
+	// GrantSuperAdmin grants super admin privilege to the target user.
+	// Requires the caller to be a super admin.
+	// buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+	GrantSuperAdmin(ctx context.Context, in *GrantSuperAdminRequest, opts ...grpc.CallOption) (*UserProfile, error)
+	// RevokeSuperAdmin revokes super admin privilege from the target user.
+	// Requires the caller to be a super admin. Fails if target is the last super admin.
+	// buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+	RevokeSuperAdmin(ctx context.Context, in *RevokeSuperAdminRequest, opts ...grpc.CallOption) (*UserProfile, error)
 }
 
 type usersServiceClient struct {
@@ -66,11 +77,32 @@ func (c *usersServiceClient) GetUserProfile(ctx context.Context, in *GetUserProf
 	return out, nil
 }
 
+func (c *usersServiceClient) GrantSuperAdmin(ctx context.Context, in *GrantSuperAdminRequest, opts ...grpc.CallOption) (*UserProfile, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UserProfile)
+	err := c.cc.Invoke(ctx, UsersService_GrantSuperAdmin_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersServiceClient) RevokeSuperAdmin(ctx context.Context, in *RevokeSuperAdminRequest, opts ...grpc.CallOption) (*UserProfile, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UserProfile)
+	err := c.cc.Invoke(ctx, UsersService_RevokeSuperAdmin_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UsersServiceServer is the server API for UsersService service.
 // All implementations must embed UnimplementedUsersServiceServer
 // for forward compatibility.
 //
 // UsersService provides operations for the authenticated user to manage their own profile.
+// Super admin operations (GrantSuperAdmin / RevokeSuperAdmin) require the caller to be a super admin.
 type UsersServiceServer interface {
 	// UpdateMyProfile updates the authenticated user's profile
 	// buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
@@ -79,6 +111,14 @@ type UsersServiceServer interface {
 	// When user_id is "-", returns the authenticated user's profile
 	// buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
 	GetUserProfile(context.Context, *GetUserProfileRequest) (*UserProfile, error)
+	// GrantSuperAdmin grants super admin privilege to the target user.
+	// Requires the caller to be a super admin.
+	// buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+	GrantSuperAdmin(context.Context, *GrantSuperAdminRequest) (*UserProfile, error)
+	// RevokeSuperAdmin revokes super admin privilege from the target user.
+	// Requires the caller to be a super admin. Fails if target is the last super admin.
+	// buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+	RevokeSuperAdmin(context.Context, *RevokeSuperAdminRequest) (*UserProfile, error)
 	mustEmbedUnimplementedUsersServiceServer()
 }
 
@@ -94,6 +134,12 @@ func (UnimplementedUsersServiceServer) UpdateMyProfile(context.Context, *UpdateM
 }
 func (UnimplementedUsersServiceServer) GetUserProfile(context.Context, *GetUserProfileRequest) (*UserProfile, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetUserProfile not implemented")
+}
+func (UnimplementedUsersServiceServer) GrantSuperAdmin(context.Context, *GrantSuperAdminRequest) (*UserProfile, error) {
+	return nil, status.Error(codes.Unimplemented, "method GrantSuperAdmin not implemented")
+}
+func (UnimplementedUsersServiceServer) RevokeSuperAdmin(context.Context, *RevokeSuperAdminRequest) (*UserProfile, error) {
+	return nil, status.Error(codes.Unimplemented, "method RevokeSuperAdmin not implemented")
 }
 func (UnimplementedUsersServiceServer) mustEmbedUnimplementedUsersServiceServer() {}
 func (UnimplementedUsersServiceServer) testEmbeddedByValue()                      {}
@@ -152,6 +198,42 @@ func _UsersService_GetUserProfile_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UsersService_GrantSuperAdmin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GrantSuperAdminRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServiceServer).GrantSuperAdmin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UsersService_GrantSuperAdmin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServiceServer).GrantSuperAdmin(ctx, req.(*GrantSuperAdminRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UsersService_RevokeSuperAdmin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RevokeSuperAdminRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServiceServer).RevokeSuperAdmin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UsersService_RevokeSuperAdmin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServiceServer).RevokeSuperAdmin(ctx, req.(*RevokeSuperAdminRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UsersService_ServiceDesc is the grpc.ServiceDesc for UsersService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -166,6 +248,14 @@ var UsersService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserProfile",
 			Handler:    _UsersService_GetUserProfile_Handler,
+		},
+		{
+			MethodName: "GrantSuperAdmin",
+			Handler:    _UsersService_GrantSuperAdmin_Handler,
+		},
+		{
+			MethodName: "RevokeSuperAdmin",
+			Handler:    _UsersService_RevokeSuperAdmin_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

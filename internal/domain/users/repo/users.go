@@ -11,11 +11,15 @@ import (
 
 type UsersRepo interface {
 	crud.Repository[idgen.ID, *User]
+	CreateWithFirstUserSuperAdmin(ctx context.Context, u *User) (isFirstUser bool, err error)
 
 	GetByUsername(ctx context.Context, username string) (*User, error)
 	GetByEmail(ctx context.Context, email string) (*User, error)
 
 	IsSuperAdmin(ctx context.Context, userId idgen.ID) (bool, error)
+	// SetSuperAdmin grants (grant=true) or revokes (grant=false) super admin privilege.
+	// When revoking, returns an error if the target is the last super admin.
+	SetSuperAdmin(ctx context.Context, userID idgen.ID, grant bool) error
 }
 
 type UserQueryFilter struct {

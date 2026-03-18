@@ -283,6 +283,96 @@ func (x *GetUserProfileRequest) GetUserId() string {
 	return ""
 }
 
+// GrantSuperAdminRequest contains the target user ID to grant super admin.
+type GrantSuperAdminRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GrantSuperAdminRequest) Reset() {
+	*x = GrantSuperAdminRequest{}
+	mi := &file_api_v1_users_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GrantSuperAdminRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GrantSuperAdminRequest) ProtoMessage() {}
+
+func (x *GrantSuperAdminRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_v1_users_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GrantSuperAdminRequest.ProtoReflect.Descriptor instead.
+func (*GrantSuperAdminRequest) Descriptor() ([]byte, []int) {
+	return file_api_v1_users_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *GrantSuperAdminRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+// RevokeSuperAdminRequest contains the target user ID to revoke super admin.
+type RevokeSuperAdminRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RevokeSuperAdminRequest) Reset() {
+	*x = RevokeSuperAdminRequest{}
+	mi := &file_api_v1_users_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RevokeSuperAdminRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RevokeSuperAdminRequest) ProtoMessage() {}
+
+func (x *RevokeSuperAdminRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_v1_users_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RevokeSuperAdminRequest.ProtoReflect.Descriptor instead.
+func (*RevokeSuperAdminRequest) Descriptor() ([]byte, []int) {
+	return file_api_v1_users_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *RevokeSuperAdminRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
 var File_api_v1_users_proto protoreflect.FileDescriptor
 
 const file_api_v1_users_proto_rawDesc = "" +
@@ -313,10 +403,16 @@ const file_api_v1_users_proto_rawDesc = "" +
 	"\vupdate_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\n" +
 	"updateMask\"8\n" +
 	"\x15GetUserProfileRequest\x12\x1f\n" +
-	"\auser_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x06userId2\xf8\x01\n" +
+	"\auser_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x06userId\"9\n" +
+	"\x16GrantSuperAdminRequest\x12\x1f\n" +
+	"\auser_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x06userId\":\n" +
+	"\x17RevokeSuperAdminRequest\x12\x1f\n" +
+	"\auser_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x06userId2\x81\x04\n" +
 	"\fUsersService\x12s\n" +
 	"\x0fUpdateMyProfile\x12#.lynx.api.v1.UpdateMyProfileRequest\x1a\x18.lynx.api.v1.UserProfile\"!\x82\xd3\xe4\x93\x02\x1b:\x04user2\x13/v1/users/-/profile\x12s\n" +
-	"\x0eGetUserProfile\x12\".lynx.api.v1.GetUserProfileRequest\x1a\x18.lynx.api.v1.UserProfile\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/v1/users/{user_id}/profileB>Z<github.com/lynx-go/lynx-clean-template/genproto/api/v1;apipbb\x06proto3"
+	"\x0eGetUserProfile\x12\".lynx.api.v1.GetUserProfileRequest\x1a\x18.lynx.api.v1.UserProfile\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/v1/users/{user_id}/profile\x12\x82\x01\n" +
+	"\x0fGrantSuperAdmin\x12#.lynx.api.v1.GrantSuperAdminRequest\x1a\x18.lynx.api.v1.UserProfile\"0\x82\xd3\xe4\x93\x02*:\x01*\"%/v1/admin/users/{user_id}/super-admin\x12\x81\x01\n" +
+	"\x10RevokeSuperAdmin\x12$.lynx.api.v1.RevokeSuperAdminRequest\x1a\x18.lynx.api.v1.UserProfile\"-\x82\xd3\xe4\x93\x02'*%/v1/admin/users/{user_id}/super-adminB>Z<github.com/lynx-go/lynx-clean-template/genproto/api/v1;apipbb\x06proto3"
 
 var (
 	file_api_v1_users_proto_rawDescOnce sync.Once
@@ -330,31 +426,37 @@ func file_api_v1_users_proto_rawDescGZIP() []byte {
 	return file_api_v1_users_proto_rawDescData
 }
 
-var file_api_v1_users_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_api_v1_users_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_api_v1_users_proto_goTypes = []any{
-	(*UserProfile)(nil),            // 0: lynx.api.v1.UserProfile
-	(*UpdateMyProfileRequest)(nil), // 1: lynx.api.v1.UpdateMyProfileRequest
-	(*GetUserProfileRequest)(nil),  // 2: lynx.api.v1.GetUserProfileRequest
-	(*timestamppb.Timestamp)(nil),  // 3: google.protobuf.Timestamp
-	(*shared.UserMetadata)(nil),    // 4: lynx.shared.UserMetadata
-	(*shared.AppMetadata)(nil),     // 5: lynx.shared.AppMetadata
-	(*fieldmaskpb.FieldMask)(nil),  // 6: google.protobuf.FieldMask
+	(*UserProfile)(nil),             // 0: lynx.api.v1.UserProfile
+	(*UpdateMyProfileRequest)(nil),  // 1: lynx.api.v1.UpdateMyProfileRequest
+	(*GetUserProfileRequest)(nil),   // 2: lynx.api.v1.GetUserProfileRequest
+	(*GrantSuperAdminRequest)(nil),  // 3: lynx.api.v1.GrantSuperAdminRequest
+	(*RevokeSuperAdminRequest)(nil), // 4: lynx.api.v1.RevokeSuperAdminRequest
+	(*timestamppb.Timestamp)(nil),   // 5: google.protobuf.Timestamp
+	(*shared.UserMetadata)(nil),     // 6: lynx.shared.UserMetadata
+	(*shared.AppMetadata)(nil),      // 7: lynx.shared.AppMetadata
+	(*fieldmaskpb.FieldMask)(nil),   // 8: google.protobuf.FieldMask
 }
 var file_api_v1_users_proto_depIdxs = []int32{
-	3,  // 0: lynx.api.v1.UserProfile.created_at:type_name -> google.protobuf.Timestamp
-	3,  // 1: lynx.api.v1.UserProfile.updated_at:type_name -> google.protobuf.Timestamp
-	3,  // 2: lynx.api.v1.UserProfile.last_sign_in_at:type_name -> google.protobuf.Timestamp
-	3,  // 3: lynx.api.v1.UserProfile.banned_until:type_name -> google.protobuf.Timestamp
-	4,  // 4: lynx.api.v1.UserProfile.user_metadata:type_name -> lynx.shared.UserMetadata
-	5,  // 5: lynx.api.v1.UserProfile.app_metadata:type_name -> lynx.shared.AppMetadata
+	5,  // 0: lynx.api.v1.UserProfile.created_at:type_name -> google.protobuf.Timestamp
+	5,  // 1: lynx.api.v1.UserProfile.updated_at:type_name -> google.protobuf.Timestamp
+	5,  // 2: lynx.api.v1.UserProfile.last_sign_in_at:type_name -> google.protobuf.Timestamp
+	5,  // 3: lynx.api.v1.UserProfile.banned_until:type_name -> google.protobuf.Timestamp
+	6,  // 4: lynx.api.v1.UserProfile.user_metadata:type_name -> lynx.shared.UserMetadata
+	7,  // 5: lynx.api.v1.UserProfile.app_metadata:type_name -> lynx.shared.AppMetadata
 	0,  // 6: lynx.api.v1.UpdateMyProfileRequest.user:type_name -> lynx.api.v1.UserProfile
-	6,  // 7: lynx.api.v1.UpdateMyProfileRequest.update_mask:type_name -> google.protobuf.FieldMask
+	8,  // 7: lynx.api.v1.UpdateMyProfileRequest.update_mask:type_name -> google.protobuf.FieldMask
 	1,  // 8: lynx.api.v1.UsersService.UpdateMyProfile:input_type -> lynx.api.v1.UpdateMyProfileRequest
 	2,  // 9: lynx.api.v1.UsersService.GetUserProfile:input_type -> lynx.api.v1.GetUserProfileRequest
-	0,  // 10: lynx.api.v1.UsersService.UpdateMyProfile:output_type -> lynx.api.v1.UserProfile
-	0,  // 11: lynx.api.v1.UsersService.GetUserProfile:output_type -> lynx.api.v1.UserProfile
-	10, // [10:12] is the sub-list for method output_type
-	8,  // [8:10] is the sub-list for method input_type
+	3,  // 10: lynx.api.v1.UsersService.GrantSuperAdmin:input_type -> lynx.api.v1.GrantSuperAdminRequest
+	4,  // 11: lynx.api.v1.UsersService.RevokeSuperAdmin:input_type -> lynx.api.v1.RevokeSuperAdminRequest
+	0,  // 12: lynx.api.v1.UsersService.UpdateMyProfile:output_type -> lynx.api.v1.UserProfile
+	0,  // 13: lynx.api.v1.UsersService.GetUserProfile:output_type -> lynx.api.v1.UserProfile
+	0,  // 14: lynx.api.v1.UsersService.GrantSuperAdmin:output_type -> lynx.api.v1.UserProfile
+	0,  // 15: lynx.api.v1.UsersService.RevokeSuperAdmin:output_type -> lynx.api.v1.UserProfile
+	12, // [12:16] is the sub-list for method output_type
+	8,  // [8:12] is the sub-list for method input_type
 	8,  // [8:8] is the sub-list for extension type_name
 	8,  // [8:8] is the sub-list for extension extendee
 	0,  // [0:8] is the sub-list for field type_name
@@ -371,7 +473,7 @@ func file_api_v1_users_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_v1_users_proto_rawDesc), len(file_api_v1_users_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

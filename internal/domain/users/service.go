@@ -114,7 +114,7 @@ func (svc *UserService) Create(ctx context.Context, req *UserCreateRequest) (idg
 		UpdatedAt:    now,
 	}
 
-	if err := svc.usersRepo.Create(ctx, newUser); err != nil {
+	if _, err := svc.usersRepo.CreateWithFirstUserSuperAdmin(ctx, newUser); err != nil {
 		return "", errors.Wrap(err, "failed to create user")
 	}
 

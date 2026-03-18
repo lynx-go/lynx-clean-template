@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/lynx-go/lynx-clean-template/internal/domain/users/repo"
 	"github.com/lynx-go/lynx-clean-template/internal/infra/bun/mapper"
@@ -18,6 +19,8 @@ import (
 type UsersRepo struct {
 	db *bun.DB
 }
+
+const firstUserBootstrapLockKey int64 = 2026031801
 
 func NewUsersRepo(data *clients.DataClients) repo.UsersRepo {
 	return &UsersRepo{db: data.GetBunDB()}
@@ -41,6 +44,44 @@ var userFieldMappings = map[string]string{
 // CrudRepository methods
 
 func (r *UsersRepo) Create(ctx context.Context, u *repo.User) error {
+	return r.createWithDB(ctx, r.db, u)
+}
+
+func (r *UsersRepo) CreateWithFirstUserSuperAdmin(ctx context.Context, u *repo.User) (bool, error) {
+	if u == nil {
+		return false, errors.New("user is nil")
+	}
+
+	isFirstUser := false
+	err := r.db.RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
+		if _, err := tx.NewRaw("SELECT pg_advisory_xact_lock(?)", firstUserBootstrapLockKey).Exec(ctx); err != nil {
+			return err
+		}
+
+		var hasUsers bool
+		if err := tx.NewRaw("SELECT EXISTS (SELECT 1 FROM users)").Scan(ctx, &hasUsers); err != nil {
+			return err
+		}
+
+		toCreate := *u
+		isFirstUser = !hasUsers
+		if isFirstUser && !toCreate.IsSuperAdmin {
+			toCreate.IsSuperAdmin = true
+			toCreate.Role = "admin"
+		}
+
+		if err := r.createWithDB(ctx, tx, &toCreate); err != nil {
+			return err
+		}
+
+		*u = toCreate
+		return nil
+	})
+
+	return isFirstUser, err
+}
+
+func (r *UsersRepo) createWithDB(ctx context.Context, db bun.IDB, u *repo.User) error {
 	user := &model.User{
 		ID:           u.ID.String(),
 		Username:     u.Username,
@@ -76,7 +117,7 @@ func (r *UsersRepo) Create(ctx context.Context, u *repo.User) error {
 		user.BannedUntil = u.BannedUntil
 	}
 
-	_, err := r.db.NewInsert().Model(user).Exec(ctx)
+	_, err := db.NewInsert().Model(user).Exec(ctx)
 	return err
 }
 
@@ -287,3 +328,39 @@ func (r *UsersRepo) IsSuperAdmin(ctx context.Context, userId idgen.ID) (bool, er
 
 	return user.IsSuperAdmin, nil
 }
+
+func (r *UsersRepo) SetSuperAdmin(ctx context.Context, userID idgen.ID, grant bool) error {
+	now := time.Now()
+	if grant {
+		_, err := r.db.NewUpdate().
+			TableExpr("users").
+			Set("is_super_admin = ?", true).
+			Set("role = ?", "admin").
+			Set("updated_at = ?", now).
+			Where("id = ?", userID.String()).
+			Exec(ctx)
+		return err
+	}
+
+	// Revoke: ensure at least one super admin remains after this operation.
+	return r.db.RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
+		var count int
+		if err := tx.NewRaw(
+			"SELECT COUNT(*) FROM users WHERE is_super_admin = TRUE AND status != ?", -2,
+		).Scan(ctx, &count); err != nil {
+			return err
+		}
+		if count <= 1 {
+			return errors.New("cannot revoke the last super admin")
+		}
+		_, err := tx.NewUpdate().
+			TableExpr("users").
+			Set("is_super_admin = ?", false).
+			Set("role = ?", "user").
+			Set("updated_at = ?", now).
+			Where("id = ?", userID.String()).
+			Exec(ctx)
+		return err
+	})
+}
+

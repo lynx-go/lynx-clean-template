@@ -99,6 +99,60 @@ func (uc *Users) GetUserProfile(ctx context.Context, req *apipb.GetUserProfileRe
 	return toUserProfile(ctx, user, uc.urlRenderer), nil
 }
 
+// GrantSuperAdmin grants super admin privilege to the target user.
+// Caller must be a super admin.
+func (uc *Users) GrantSuperAdmin(ctx context.Context, req *apipb.GrantSuperAdminRequest) (*apipb.UserProfile, error) {
+	callerID, _ := contexts.UserID(ctx)
+	ok, err := uc.usersRepo.IsSuperAdmin(ctx, callerID)
+	if err != nil {
+		return nil, apierrors.Wrap(err, "failed to check admin status")
+	}
+	if !ok {
+		return nil, apierrors.New(403, "only super admins can grant super admin privilege")
+	}
+
+	targetID := idgen.ID(req.UserId)
+	if err := uc.usersRepo.SetSuperAdmin(ctx, targetID, true); err != nil {
+		return nil, apierrors.Wrap(err, "failed to grant super admin")
+	}
+
+	user, err := uc.usersRepo.Get(ctx, targetID)
+	if err != nil {
+		return nil, apierrors.Wrap(err, "failed to get user")
+	}
+	if user == nil {
+		return nil, apierrors.Cause("user not found")
+	}
+	return toUserProfile(ctx, user, uc.urlRenderer), nil
+}
+
+// RevokeSuperAdmin revokes super admin privilege from the target user.
+// Caller must be a super admin. Fails if the target is the last super admin.
+func (uc *Users) RevokeSuperAdmin(ctx context.Context, req *apipb.RevokeSuperAdminRequest) (*apipb.UserProfile, error) {
+	callerID, _ := contexts.UserID(ctx)
+	ok, err := uc.usersRepo.IsSuperAdmin(ctx, callerID)
+	if err != nil {
+		return nil, apierrors.Wrap(err, "failed to check admin status")
+	}
+	if !ok {
+		return nil, apierrors.New(403, "only super admins can revoke super admin privilege")
+	}
+
+	targetID := idgen.ID(req.UserId)
+	if err := uc.usersRepo.SetSuperAdmin(ctx, targetID, false); err != nil {
+		return nil, apierrors.Wrap(err, "failed to revoke super admin")
+	}
+
+	user, err := uc.usersRepo.Get(ctx, targetID)
+	if err != nil {
+		return nil, apierrors.Wrap(err, "failed to get user")
+	}
+	if user == nil {
+		return nil, apierrors.Cause("user not found")
+	}
+	return toUserProfile(ctx, user, uc.urlRenderer), nil
+}
+
 func (uc *Users) UpdateMyProfile(ctx context.Context, req *apipb.UpdateMyProfileRequest) (*apipb.UserProfile, error) {
 	uid, _ := contexts.UserID(ctx)
 
