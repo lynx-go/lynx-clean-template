@@ -19,21 +19,19 @@ func (r *Router) Name() string {
 	return "pubsub-router"
 }
 
-func (r *Router) Init(app lynx.Lynx) error {
+func (r *Router) Init(app lynx.AppContext) error {
 	r.ctx, r.cancelCtx = context.WithCancel(app.Context())
-	return nil
+	return r.run(app.Context())
 }
 
 func (r *Router) Start(ctx context.Context) error {
-	if err := r.run(ctx); err != nil {
-		return err
-	}
 	<-r.ctx.Done()
 	return nil
 }
 
-func (r *Router) Stop(ctx context.Context) {
+func (r *Router) Stop(ctx context.Context) error {
 	r.cancelCtx()
+	return nil
 }
 
 func NewRouter(pubSub *Broker, handlers []Handler) *Router {
@@ -60,4 +58,4 @@ func (r *Router) run(ctx context.Context) error {
 	return nil
 }
 
-var _ lynx.Component = new(Router)
+var _ lynx.Service = new(Router)

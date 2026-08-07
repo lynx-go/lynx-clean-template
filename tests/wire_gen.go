@@ -12,7 +12,7 @@ import (
 
 // Injectors from wire.go:
 
-func wireTestingSuite(app lynx.Lynx) (*TestingSuite, func(), error) {
+func wireTestingSuite(app lynx.App) (*TestingSuite, func(), error) {
 	testingSuite := NewTestingSuite()
 	return testingSuite, func() {
 	}, nil

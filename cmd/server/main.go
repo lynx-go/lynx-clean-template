@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"log"
-	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/joho/godotenv"
@@ -12,6 +11,7 @@ import (
 	"github.com/lynx-go/lynx-clean-template/pkg/timeutil"
 	"github.com/lynx-go/lynx/contrib/zap"
 	"github.com/spf13/pflag"
+	"time"
 )
 
 var (
@@ -19,8 +19,20 @@ var (
 )
 
 func main() {
+	builder := lynx.NewBuilder(func(ctx context.Context, app lynx.App) error {
+		app.SetLogger(zap.MustNewLogger(app))
 
-	o := lynx.NewOptions(
+		boot, cleanup, err := wireBootstrap(app)
+		if err != nil {
+			log.Fatal(err)
+		}
+		app.OnStop(func(ctx context.Context) error {
+			cleanup()
+			return nil
+		})
+		boot.Bind(app)
+		return nil
+	},
 		lynx.WithName("lynx-api"),
 		lynx.WithVersion(version),
 		lynx.WithSetFlagsFunc(func(f *pflag.FlagSet) {
@@ -28,25 +40,9 @@ func main() {
 			f.String("log-level", "info", "log level, default info")
 		}),
 		lynx.WithBindConfigFunc(config.NewBindConfigFunc()),
-		lynx.WithCloseTimeout(30*time.Second),
+		lynx.WithStopTimeout(30*time.Second),
 	)
-
-	app := lynx.New(o, func(ctx context.Context, app lynx.Lynx) error {
-		app.SetLogger(zap.MustNewLogger(app))
-
-		boot, cleanup, err := wireBootstrap(app)
-		if err != nil {
-			log.Fatal(err)
-		}
-		if err := app.Hooks(lynx.OnStop(func(ctx context.Context) error {
-			cleanup()
-			return nil
-		})); err != nil {
-			return err
-		}
-		return boot.Bind(app)
-	})
-	app.Run()
+	builder.Run()
 }
 
 func init() {

@@ -7,10 +7,21 @@ import (
 	"github.com/lynx-go/lynx-clean-template/internal/pkg/config"
 	"github.com/lynx-go/lynx-clean-template/pkg/pubsub"
 	"github.com/lynx-go/lynx/contrib/kafka"
+	lxpubsub "github.com/lynx-go/lynx/contrib/pubsub"
 )
 
-func NewPubSub(binder *kafka.Binder) *pubsub.Broker {
-	return pubsub.NewPubSub(binder)
+func NewPubSub(kafkaT *kafka.Transport) *pubsub.Broker {
+	// memory 作为默认回退：未配置 kafka 的逻辑 topic 走进程内 transport。
+	memT := lxpubsub.NewMemoryTransport()
+	transports := []lxpubsub.Transport{memT}
+	if kafkaT != nil {
+		transports = append(transports, kafkaT)
+	}
+	broker := lxpubsub.NewBroker(lxpubsub.Options{
+		Transports:       transports,
+		DefaultTransport: memT,
+	})
+	return pubsub.NewPubSub(broker)
 }
 
 func NewPublisher(broker *pubsub.Broker) pubsub.Publisher {
@@ -27,58 +38,54 @@ func NewPubSubRouter(
 	})
 }
 
-func NewKafkaBinderForServer(config *config.AppConfig) *kafka.Binder {
-	return NewKafkaBinder(config, false)
+func NewKafkaTransportForServer(config *config.AppConfig) (*kafka.Transport, error) {
+	return NewKafkaTransport(config, false)
 }
 
-func NewKafkaBinderForCLI(config *config.AppConfig) *kafka.Binder {
-	return NewKafkaBinder(config, true)
+func NewKafkaTransportForCLI(config *config.AppConfig) (*kafka.Transport, error) {
+	return NewKafkaTransport(config, true)
 }
 
-func NewKafkaBinder(config *config.AppConfig, forCli bool) *kafka.Binder {
-	bindOptions := kafka.BinderOptions{
-		SubscribeOptions: map[string]kafka.ConsumerOptions{},
-		PublishOptions:   map[string]kafka.ProducerOptions{},
-	}
+// NewKafkaTransport 从 AppConfig 的 pubsub.kafka 段构建 kafka Transport。
+// 未配置任何 topic 时返回 (nil, nil)，表示 Kafka 未启用。
+func NewKafkaTransport(config *config.AppConfig, forCli bool) (*kafka.Transport, error) {
+	topics := map[string]kafka.TopicOptions{}
 	if config.Pubsub != nil && config.Pubsub.Kafka != nil {
-		cfgs := config.Pubsub.Kafka
-		for k, c := range cfgs {
+		for name, c := range config.Pubsub.Kafka {
+			to := kafka.TopicOptions{
+				Brokers: c.Brokers,
+				Topics:  []string{c.Topic},
+			}
 			if c.Consumer != nil && !forCli {
-				bindOptions.SubscribeOptions[k] = kafka.ConsumerOptions{
-					Brokers:     c.Brokers,
-					Topic:       c.Topic,
-					Group:       c.Consumer.GroupId,
-					Instances:   int(c.Consumer.Instances),
-					LogMessage:  c.Consumer.LogMessage,
-					MappedEvent: c.Consumer.MappedEvent,
+				to.Consumer = &kafka.ConsumerOptions{
+					GroupID:    c.Consumer.GroupId,
+					Instances:  int(c.Consumer.Instances),
+					LogMessage: c.Consumer.LogMessage,
 				}
 			}
 			if c.Producer != nil {
-				var batchTimeout time.Duration
 				var batchSize int
-				var async bool
+				var flushFrequency time.Duration
 				// CLI 模式立即发送
 				if forCli {
-					batchTimeout = 1 * time.Millisecond
 					batchSize = 1
-					async = false
+					flushFrequency = time.Millisecond
 				} else {
 					batchSize = int(c.Producer.BatchSize)
-					batchTimeout, _ = time.ParseDuration(c.Producer.BatchTimeout)
-					async = c.Producer.Async
+					flushFrequency, _ = time.ParseDuration(c.Producer.BatchTimeout)
 				}
-				bindOptions.PublishOptions[k] = kafka.ProducerOptions{
-					Brokers:      c.Brokers,
-					Topic:        c.Topic,
-					LogMessage:   c.Producer.LogMessage,
-					MappedEvent:  c.Producer.MappedEvent,
-					BatchSize:    batchSize,
-					BatchTimeout: batchTimeout,
-					Async:        async,
+				to.Producer = &kafka.ProducerOptions{
+					Topic:          c.Topic,
+					LogMessage:     c.Producer.LogMessage,
+					BatchSize:      batchSize,
+					FlushFrequency: flushFrequency,
 				}
 			}
+			topics[name] = to
 		}
 	}
-
-	return kafka.NewBinder(bindOptions)
+	if len(topics) == 0 {
+		return nil, nil
+	}
+	return kafka.NewTransport(kafka.Options{Topics: topics})
 }

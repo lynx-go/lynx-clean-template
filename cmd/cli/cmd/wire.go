@@ -9,6 +9,6 @@ import (
 	"github.com/lynx-go/lynx"
 )
 
-func wireCLIContext(app lynx.Lynx) (*CLIContext, func(), error) {
+func wireCLIContext(app lynx.App) (*CLIContext, func(), error) {
 	panic(wire.Build(ProviderSet, NewCLIContext))
 }

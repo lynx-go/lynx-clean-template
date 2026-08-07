@@ -10,6 +10,7 @@ import (
 	"github.com/lynx-go/lynx-clean-template/internal/infra/server"
 	config "github.com/lynx-go/lynx-clean-template/internal/pkg/config"
 	"github.com/lynx-go/lynx-clean-template/pkg/pubsub"
+	"github.com/lynx-go/lynx/boot"
 	"github.com/lynx-go/lynx/contrib/kafka"
 )
 
@@ -18,10 +19,9 @@ var ProviderSet = wire.NewSet(
 	app.ProviderSet,
 	infra.ProviderSet,
 	domain.ProviderSet,
-	server.NewKafkaBinderForCLI,
-	NewComponents,
-	NewComponentBuilders,
-	NewComponentBuilderSetFunc,
+	server.NewKafkaTransportForCLI,
+	NewServices,
+	NewServiceFactories,
 	NewOnStarts,
 	NewOnStops,
 	NewHealthChecks,
@@ -29,48 +29,41 @@ var ProviderSet = wire.NewSet(
 	NewTestingSuite,
 )
 
-func NewAppConfig(app lynx.Lynx) (*config.AppConfig, error) {
+func NewAppConfig(app lynx.App) (*config.AppConfig, error) {
 	var c config.AppConfig
-	if err := app.Config().Unmarshal(&c, lynx.TagNameJSON); err != nil {
+	if err := config.UnmarshalConfig(app.Config(), &c); err != nil {
 		return nil, err
 	}
 	return &c, nil
 }
 
-func NewHealthChecks(app lynx.Lynx) lynx.HealthCheckFunc {
-	return app.HealthCheckFunc()
+func NewHealthChecks(app lynx.App) lynx.HealthCheckersFunc {
+	return app.HealthCheckers
 }
 
-func NewComponents(
+func NewServices(
 	broker *pubsub.Broker,
-	binder *kafka.Binder,
+	kafkaT *kafka.Transport,
 	router *pubsub.Router,
-) []lynx.Component {
-	return []lynx.Component{
-		broker,
-		binder,
-		router,
+) []lynx.Service {
+	services := []lynx.Service{broker, router}
+	if kafkaT != nil {
+		services = append(services, kafkaT)
 	}
+	return services
 }
 
-func NewOnStarts() lynx.OnStartHooks {
-	hooks := lynx.OnStartHooks{}
+func NewOnStarts() boot.OnStartHooks {
+	hooks := boot.OnStartHooks{}
 	return hooks
 }
 
-func NewOnStops() lynx.OnStopHooks {
-	hooks := lynx.OnStopHooks{}
+func NewOnStops() boot.OnStopHooks {
+	hooks := boot.OnStopHooks{}
 	return hooks
 }
 
-func NewComponentBuilders() []lynx.ComponentBuilder {
-	var builders []lynx.ComponentBuilder
-	return builders
-}
-
-func NewComponentBuilderSetFunc() lynx.ComponentBuilderSetFunc {
-	return func() lynx.ComponentBuilderSet {
-		var builders []lynx.ComponentBuilder
-		return builders
-	}
+func NewServiceFactories() []lynx.ServiceFactory {
+	var factories []lynx.ServiceFactory
+	return factories
 }

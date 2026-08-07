@@ -33,7 +33,7 @@ type GRPCGatewayServer struct {
 }
 
 func NewGRPCGatewayServer(
-	app lynx.Lynx,
+	app lynx.App,
 	config *config.AppConfig,
 ) (*GRPCGatewayServer, error) {
 	c := config.GetServer().GetHttp()

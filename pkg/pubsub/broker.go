@@ -3,8 +3,8 @@ package pubsub
 import (
 	"context"
 
-	"github.com/ThreeDotsLabs/watermill/message"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/lynx-go/lynx"
 	"github.com/lynx-go/lynx/contrib/pubsub"
 	"github.com/lynx-go/x/log"
 )
@@ -18,8 +18,7 @@ type Broker struct {
 	pubsub.Broker
 }
 
-func NewPubSub(binder pubsub.Binder) *Broker {
-	broker := pubsub.NewBroker(pubsub.Options{}, []pubsub.Binder{binder})
+func NewPubSub(broker pubsub.Broker) *Broker {
 	return &Broker{broker}
 }
 
@@ -27,35 +26,40 @@ func NewPublisher(broker *Broker) Publisher {
 	return broker
 }
 
+// Publish 构造 cloudevents 信封并直接发布业务对象（cloudevents.Event），
+// 由 Broker 按 topic 的 Marshaler 自动序列化。
 func (b *Broker) Publish(ctx context.Context, topicName TopicName, eventName EventName, data any, opts ...pubsub.PublishOption) error {
 	log.InfoContext(ctx, "publishing event", "topicName", topicName, "eventName", eventName)
 	o := &pubsub.PublishOptions{}
 	for _, opt := range opts {
 		opt(o)
 	}
-	msg, err := NewMessage(b.ID(), eventName.String(), data)
+	source := lynx.IDFromContext(ctx)
+	if source == "" {
+		source = "lynx"
+	}
+	event, err := NewEvent(source, eventName.String(), data)
 	if err != nil {
 		return err
 	}
 
-	return b.Broker.Publish(context.WithoutCancel(ctx), topicName.String(), msg, opts...)
+	return b.Broker.Publish(context.WithoutCancel(ctx), topicName.String(), event, opts...)
 }
 
 type HandlerFunc func(ctx context.Context, e *cloudevents.Event) error
 
+// Subscribe 以强类型订阅注册 handler：框架经 topic 的 Marshaler 把消息
+// Payload 解码为 *cloudevents.Event（TypedMessage[cloudevents.Event]）后
+// 按 event type 过滤并调用 h。
 func (b *Broker) Subscribe(topicName TopicName, eventName EventName, handlerName string, h HandlerFunc, opts ...pubsub.SubscribeOption) error {
-	handler := func(ctx context.Context, msg *message.Message) error {
-		event := cloudevents.NewEvent()
-		if err := event.UnmarshalJSON(msg.Payload); err != nil {
-			return err
-		}
-		if event.Type() == eventName.String() {
-			return h(ctx, &event)
-		}
-
-		return nil
-	}
-	return b.Broker.Subscribe(topicName.String(), handlerName, handler, opts...)
+	return pubsub.Subscribe[cloudevents.Event](b.Broker, context.Background(), topicName.String(), handlerName,
+		func(ctx context.Context, tm *pubsub.TypedMessage[cloudevents.Event]) error {
+			event := &tm.Payload
+			if event.Type() == eventName.String() {
+				return h(ctx, event)
+			}
+			return nil
+		}, opts...)
 }
 
 type Handler interface {

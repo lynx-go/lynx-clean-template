@@ -16,7 +16,7 @@ func NewAuthValidator(
 }
 
 func NewGRPCServer(
-	app lynx.Lynx,
+	app lynx.App,
 	cfg *config.AppConfig,
 	authValidator interceptor.Validator,
 	auth *grpcsvc.AuthService,

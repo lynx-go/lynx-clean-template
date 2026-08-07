@@ -25,66 +25,60 @@ var ProviderSet = wire.NewSet(
 	infra.ProviderSet,
 	domain.ProviderSet,
 
-	server.NewKafkaBinderForServer,
+	server.NewKafkaTransportForServer,
 
-	NewComponents,
-	NewComponentBuilders,
-	NewComponentBuilderSetFunc,
+	NewServices,
+	NewServiceFactories,
 	NewOnStarts,
 	NewOnStops,
 	NewHealthChecks,
 	NewAppConfig,
 )
 
-func NewAppConfig(app lynx.Lynx) (*config.AppConfig, error) {
+func NewAppConfig(app lynx.App) (*config.AppConfig, error) {
 	var c config.AppConfig
-	if err := app.Config().Unmarshal(&c, lynx.TagNameJSON); err != nil {
+	if err := config.UnmarshalConfig(app.Config(), &c); err != nil {
 		return nil, err
 	}
 	return &c, nil
 }
 
-func NewHealthChecks(app lynx.Lynx) lynx.HealthCheckFunc {
-	return app.HealthCheckFunc()
+func NewHealthChecks(app lynx.App) lynx.HealthCheckersFunc {
+	return app.HealthCheckers
 }
 
-func NewComponents(
+func NewServices(
 	scheduler *schedule.Scheduler,
 	pubSubBroker *pubsub.Broker,
-	pubSubBinder *kafka.Binder,
+	pubSubTransport *kafka.Transport,
 	pubSubRouter *pubsub.Router,
 	grpcServer *grpc.Server,
 	grpcGatewayServer *server.GRPCGatewayServer,
-) []lynx.Component {
-	return []lynx.Component{
+) []lynx.Service {
+	services := []lynx.Service{
 		scheduler,
 		pubSubBroker,
 		grpcGatewayServer,
 		pubSubRouter,
-		pubSubBinder,
-		grpcServer,
 	}
+	if pubSubTransport != nil {
+		services = append(services, pubSubTransport)
+	}
+	services = append(services, grpcServer)
+	return services
 }
 
-func NewOnStarts() lynx.OnStartHooks {
-	hooks := lynx.OnStartHooks{}
+func NewOnStarts() boot.OnStartHooks {
+	hooks := boot.OnStartHooks{}
 	return hooks
 }
 
-func NewOnStops() lynx.OnStopHooks {
-	hooks := lynx.OnStopHooks{}
+func NewOnStops() boot.OnStopHooks {
+	hooks := boot.OnStopHooks{}
 	return hooks
 }
 
-func NewComponentBuilders() []lynx.ComponentBuilder {
-	var builders []lynx.ComponentBuilder
-	return builders
-}
-
-func NewComponentBuilderSetFunc(
-	binder *kafka.Binder,
-) lynx.ComponentBuilderSetFunc {
-	return func() lynx.ComponentBuilderSet {
-		return binder.ConsumerBuilders()
-	}
+func NewServiceFactories() []lynx.ServiceFactory {
+	var factories []lynx.ServiceFactory
+	return factories
 }

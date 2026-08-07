@@ -26,7 +26,7 @@ import (
 
 // Injectors from wire.go:
 
-func wireBootstrap(app2 lynx.Lynx) (*boot.Bootstrap, func(), error) {
+func wireBootstrap(app2 lynx.App) (*boot.Bootstrap, func(), error) {
 	onStartHooks := NewOnStarts()
 	onStopHooks := NewOnStops()
 	scheduler, err := server.NewScheduler()
@@ -37,8 +37,11 @@ func wireBootstrap(app2 lynx.Lynx) (*boot.Bootstrap, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	binder := server.NewKafkaBinderForServer(appConfig)
-	broker := server.NewPubSub(binder)
+	transport, err := server.NewKafkaTransportForServer(appConfig)
+	if err != nil {
+		return nil, nil, err
+	}
+	broker := server.NewPubSub(transport)
 	helloHandler := eventhandler.NewHelloHandler()
 	router := server.NewPubSubRouter(broker, helloHandler)
 	validator := server.NewAuthValidator(appConfig)
@@ -75,10 +78,9 @@ func wireBootstrap(app2 lynx.Lynx) (*boot.Bootstrap, func(), error) {
 		cleanup()
 		return nil, nil, err
 	}
-	v := NewComponents(scheduler, broker, binder, router, grpcServer, grpcGatewayServer)
-	v2 := NewComponentBuilders()
-	componentBuilderSetFunc := NewComponentBuilderSetFunc(binder)
-	bootstrap := boot.New(onStartHooks, onStopHooks, v, v2, componentBuilderSetFunc)
+	v := NewServices(scheduler, broker, transport, router, grpcServer, grpcGatewayServer)
+	v2 := NewServiceFactories()
+	bootstrap := boot.New(onStartHooks, onStopHooks, v, v2)
 	return bootstrap, func() {
 		cleanup()
 	}, nil

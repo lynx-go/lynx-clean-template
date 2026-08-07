@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"log"
 	"log/slog"
 	"time"
 
@@ -11,13 +12,12 @@ import (
 	"github.com/lynx-go/lynx-clean-template/internal/domain/users/repo"
 	"github.com/lynx-go/lynx-clean-template/internal/pkg/config"
 	"github.com/lynx-go/lynx-clean-template/pkg/pubsub"
+	"github.com/lynx-go/lynx/boot"
 	"github.com/lynx-go/lynx/contrib/zap"
-	"github.com/lynx-go/lynx/pkg/errors"
-	"github.com/lynx-go/x/log"
+	xl "github.com/lynx-go/x/log"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
 )
 
 type CLIArgs struct {
@@ -41,37 +41,34 @@ func (args *CLIArgs) GetBool(key string) bool {
 }
 
 func NewCLIContext(
-	app lynx.Lynx,
+	app lynx.App,
 	pubSub pubsub.Publisher,
-	components []lynx.Component,
-	componentBuilders []lynx.ComponentBuilder,
-	componentBuilderSetFunc lynx.ComponentBuilderSetFunc,
+	services []lynx.Service,
+	serviceFactories []lynx.ServiceFactory,
 	userRepo repo.UsersRepo,
-	onStarts lynx.OnStartHooks,
-	onStops lynx.OnStopHooks,
+	onStarts boot.OnStartHooks,
+	onStops boot.OnStopHooks,
 ) *CLIContext {
 	return &CLIContext{
-		App:                     app,
-		PubSub:                  pubSub,
-		Components:              components,
-		ComponentBuilders:       componentBuilders,
-		ComponentBuilderSetFunc: componentBuilderSetFunc,
-		OnStarts:                onStarts,
-		OnStops:                 onStops,
-		UserRepo:                userRepo,
+		App:              app,
+		PubSub:           pubSub,
+		Services:         services,
+		ServiceFactories: serviceFactories,
+		OnStarts:         onStarts,
+		OnStops:          onStops,
+		UserRepo:         userRepo,
 	}
 }
 
 type CLIContext struct {
-	App                     lynx.Lynx
-	PubSub                  pubsub.Publisher
-	Account                 *app.Account
-	Components              []lynx.Component
-	ComponentBuilders       []lynx.ComponentBuilder
-	ComponentBuilderSetFunc lynx.ComponentBuilderSetFunc
-	OnStarts                lynx.OnStartHooks
-	OnStops                 lynx.OnStopHooks
-	UserRepo                repo.UsersRepo
+	App              lynx.App
+	PubSub           pubsub.Publisher
+	Account          *app.Account
+	Services         []lynx.Service
+	ServiceFactories []lynx.ServiceFactory
+	OnStarts         boot.OnStartHooks
+	OnStops          boot.OnStopHooks
+	UserRepo         repo.UsersRepo
 }
 
 func (cc *CLIContext) Println(v ...interface{}) {
@@ -90,7 +87,7 @@ type cliOptions struct {
 
 type CLIOption func(*cliOptions)
 
-// WithPostWaitTime 执行结束后等待的时间，等待其他 Component 关闭
+// WithPostWaitTime 执行结束后等待的时间，等待其他 Service 关闭
 func WithPostWaitTime(waitTime time.Duration) CLIOption {
 	return func(o *cliOptions) {
 		o.PostWaitTime = waitTime
@@ -109,7 +106,7 @@ func WithPreWaitTime(waitTime time.Duration) CLIOption {
 	}
 }
 
-func newFileLogger(app lynx.Lynx) *slog.Logger {
+func newFileLogger(app lynx.App) *slog.Logger {
 	logLevel := app.Config().GetString("cli.log-level")
 	if logLevel == "" {
 		logLevel = "info"
@@ -118,18 +115,22 @@ func newFileLogger(app lynx.Lynx) *slog.Logger {
 	if logFile == "" {
 		logFile = "cli.log"
 	}
-	zlogger, err := zap.NewZapLoggerToFile(logLevel, logFile)
-	errors.Fatal(err)
+	zlogger, err := zap.NewZapLogger(logLevel, logFile)
+	if err != nil {
+		log.Fatal(err)
+	}
 	slogger, err := zap.NewSLogger(zlogger, logLevel)
-	errors.Fatal(err)
+	if err != nil {
+		log.Fatal(err)
+	}
 	return slogger
 }
 
 func runCLI(cmd *cobra.Command, args []string, fn func(ctx context.Context, cc *CLIContext, args *CLIArgs) error, opts ...CLIOption) {
 	buildCLI(cmd, args, fn, opts...).Run()
 }
-func buildCLI(cmd *cobra.Command, args []string, fn func(ctx context.Context, cc *CLIContext, args *CLIArgs) error, opts ...CLIOption) *lynx.CLI {
-	return lynx.New(newOptionsFromCmd(cmd), func(ctx context.Context, lx lynx.Lynx) error {
+func buildCLI(cmd *cobra.Command, args []string, fn func(ctx context.Context, cc *CLIContext, args *CLIArgs) error, opts ...CLIOption) *lynx.Builder {
+	return lynx.NewBuilder(func(ctx context.Context, lx lynx.App) error {
 		o := &cliOptions{
 			PreWaitTime:  10 * time.Millisecond,
 			PostWaitTime: 10 * time.Millisecond,
@@ -147,26 +148,19 @@ func buildCLI(cmd *cobra.Command, args []string, fn func(ctx context.Context, cc
 		if err != nil {
 			return err
 		}
-		if err := lx.Hooks(lynx.OnStop(func(ctx context.Context) error {
+		lx.OnStop(func(ctx context.Context) error {
 			cleanup()
 			return nil
-		})); err != nil {
-			return err
-		}
+		})
 
-		if err := lx.Hooks(
-			lynx.OnStart(cc.OnStarts...),
-			lynx.OnStop(cc.OnStops...),
-			lynx.Components(cc.Components...),
-			lynx.ComponentBuilders(cc.ComponentBuilders...),
-			lynx.ComponentBuilders(cc.ComponentBuilderSetFunc()...),
-		); err != nil {
-			return err
-		}
+		lx.OnStart(cc.OnStarts...)
+		lx.OnStop(cc.OnStops...)
+		lx.Register(cc.Services...)
+		lx.RegisterFactories(cc.ServiceFactories...)
 
-		return lx.CLI(func(ctx context.Context) error {
+		return lx.Command(func(ctx context.Context) error {
 			if o.PreWaitTime > 0 {
-				log.InfoContext(ctx, fmt.Sprintf("waiting %s for components startup", o.PreWaitTime.String()))
+				xl.InfoContext(ctx, fmt.Sprintf("waiting %s for services startup", o.PreWaitTime.String()))
 				time.Sleep(o.PreWaitTime)
 			}
 			err, ok := lo.TryWithErrorValue(func() error {
@@ -181,23 +175,23 @@ func buildCLI(cmd *cobra.Command, args []string, fn func(ctx context.Context, cc
 			}
 			if o.PostWaitTime > 0 {
 				// wait pubsub completed
-				log.InfoContext(ctx, fmt.Sprintf("waiting %s for components shutdown", o.PostWaitTime.String()))
+				xl.InfoContext(ctx, fmt.Sprintf("waiting %s for services shutdown", o.PostWaitTime.String()))
 				time.Sleep(o.PostWaitTime)
 			}
 			return nil
 		})
-	})
+	}, newOptionsFromCmd(cmd)...)
 }
 
-func newOptionsFromCmd(cmd *cobra.Command) *lynx.Options {
-	return lynx.NewOptions(
-		lynx.WithName(cmd.Root().Name()+":"+cmd.Name()),
-		lynx.WithBindConfigFunc(func(f *pflag.FlagSet, v *viper.Viper) error {
+func newOptionsFromCmd(cmd *cobra.Command) []lynx.Option {
+	return []lynx.Option{
+		lynx.WithName(cmd.Root().Name() + ":" + cmd.Name()),
+		lynx.WithBindConfigFunc(func(f *pflag.FlagSet, c lynx.ConfigSource) error {
 			if cd, _ := cmd.Root().PersistentFlags().GetString("config-dir"); cd != "" {
-				return config.ConfigureViper(f, v, cd)
+				return config.ConfigureViper(f, c, cd)
 			}
 
-			return config.ConfigureViper(f, v)
+			return config.ConfigureViper(f, c)
 		}),
-	)
+	}
 }

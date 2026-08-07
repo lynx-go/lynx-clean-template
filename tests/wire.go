@@ -8,6 +8,6 @@ import (
 	"github.com/lynx-go/lynx"
 )
 
-func wireTestingSuite(app lynx.Lynx) (*TestingSuite, func(), error) {
+func wireTestingSuite(app lynx.App) (*TestingSuite, func(), error) {
 	panic(wire.Build(ProviderSet))
 }

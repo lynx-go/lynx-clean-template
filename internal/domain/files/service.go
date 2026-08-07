@@ -70,7 +70,7 @@ func newService(repo repo.Files, logger shared.Logger) *Service {
 }
 
 func NewService(
-	app lynx.Lynx,
+	app lynx.App,
 	config *config.AppConfig,
 	repo repo.Files,
 	logger shared.Logger,
