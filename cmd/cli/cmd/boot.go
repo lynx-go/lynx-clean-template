@@ -11,9 +11,9 @@ import (
 	"github.com/lynx-go/lynx-clean-template/internal/app"
 	"github.com/lynx-go/lynx-clean-template/internal/domain/users/repo"
 	"github.com/lynx-go/lynx-clean-template/internal/pkg/config"
+	"github.com/lynx-go/lynx-clean-template/pkg/logger"
 	"github.com/lynx-go/lynx-clean-template/pkg/pubsub"
 	"github.com/lynx-go/lynx/boot"
-	"github.com/lynx-go/lynx/contrib/zap"
 	xl "github.com/lynx-go/x/log"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
@@ -115,11 +115,7 @@ func newFileLogger(app lynx.App) *slog.Logger {
 	if logFile == "" {
 		logFile = "cli.log"
 	}
-	zlogger, err := zap.NewZapLogger(logLevel, logFile)
-	if err != nil {
-		log.Fatal(err)
-	}
-	slogger, err := zap.NewSLogger(zlogger, logLevel)
+	slogger, err := logger.NewZapFile(logLevel, logFile)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -142,7 +138,7 @@ func buildCLI(cmd *cobra.Command, args []string, fn func(ctx context.Context, cc
 		if o.LogToFile {
 			lx.SetLogger(newFileLogger(lx))
 		} else {
-			lx.SetLogger(zap.MustNewLogger(lx))
+			lx.SetLogger(logger.NewZap(lx))
 		}
 		cc, cleanup, err := wireCLIContext(lx)
 		if err != nil {

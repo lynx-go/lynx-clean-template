@@ -9,7 +9,7 @@ import (
 
 	"github.com/lynx-go/lynx"
 	"github.com/lynx-go/lynx-clean-template/internal/pkg/config"
-	"github.com/lynx-go/lynx/contrib/zap"
+	"github.com/lynx-go/lynx-clean-template/pkg/logger"
 )
 
 type TestingSuite struct {
@@ -56,11 +56,7 @@ func newFileLogger(app lynx.App) *slog.Logger {
 	if logFile == "" {
 		logFile = "test.log"
 	}
-	zlogger, err := zap.NewZapLogger(logLevel, logFile)
-	if err != nil {
-		log.Fatal(err)
-	}
-	slogger, err := zap.NewSLogger(zlogger, logLevel)
+	slogger, err := logger.NewZapFile(logLevel, logFile)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -86,7 +82,7 @@ func buildTestSuite(fn func(ctx context.Context, ts *TestingSuite) error, opts .
 		if o.LogToFile {
 			lx.SetLogger(newFileLogger(lx))
 		} else {
-			lx.SetLogger(zap.MustNewLogger(lx))
+			lx.SetLogger(logger.NewZap(lx))
 		}
 
 		ts, cleanup, err := wireTestingSuite(lx)

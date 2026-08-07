@@ -1,6 +1,6 @@
 module github.com/lynx-go/lynx-clean-template
 
-go 1.25.0
+go 1.26.5
 
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.11-20260209202127-80ab13bee0bf.1
@@ -22,10 +22,10 @@ require (
 	github.com/jackc/pgx/v5 v5.7.6
 	github.com/joho/godotenv v1.5.1
 	github.com/lynx-go/lynx v1.0.0
-	github.com/lynx-go/lynx/contrib/kafka v0.7.3-0.20260807011510-9f544eafdd9b
+	github.com/lynx-go/lynx/contrib/kafka v1.0.0
 	github.com/lynx-go/lynx/contrib/pubsub v1.0.0
-	github.com/lynx-go/lynx/contrib/schedule v0.7.3-0.20260807011510-9f544eafdd9b
-	github.com/lynx-go/lynx/contrib/zap v0.7.3-0.20260807011510-9f544eafdd9b
+	github.com/lynx-go/lynx/contrib/schedule v1.0.0
+	github.com/lynx-go/lynx/contrib/zap v1.0.0
 	github.com/lynx-go/x v0.1.0
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/pkg/errors v0.9.1
@@ -147,9 +147,3 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260803160001-6ac0973c030d // indirect
 	mellium.im/sasl v0.3.2 // indirect
 )
-
-// lynx contrib 模块的开发分支要求 lynx v1.0.0（尚未发布），
-// 此处以 master pseudo-version 覆盖，v1.0.0 发布后可移除。
-replace github.com/lynx-go/lynx => github.com/lynx-go/lynx v0.7.3-0.20260807011510-9f544eafdd9b
-
-replace github.com/lynx-go/lynx/contrib/pubsub => github.com/lynx-go/lynx/contrib/pubsub v0.7.3-0.20260807011510-9f544eafdd9b

@@ -20,6 +20,11 @@ func NewPubSub(kafkaT *kafka.Transport) *pubsub.Broker {
 	broker := lxpubsub.NewBroker(lxpubsub.Options{
 		Transports:       transports,
 		DefaultTransport: memT,
+		// 消息收发 debug 级日志（发布/订阅两侧独立，经应用日志级别过滤）
+		LogMessage: &lxpubsub.LogMessageOptions{
+			Publish:   true,
+			Subscribe: true,
+		},
 	})
 	return pubsub.NewPubSub(broker)
 }

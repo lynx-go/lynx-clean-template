@@ -8,8 +8,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/lynx-go/lynx"
 	config "github.com/lynx-go/lynx-clean-template/internal/pkg/config"
+	"github.com/lynx-go/lynx-clean-template/pkg/logger"
 	"github.com/lynx-go/lynx-clean-template/pkg/timeutil"
-	"github.com/lynx-go/lynx/contrib/zap"
 	"github.com/spf13/pflag"
 	"time"
 )
@@ -20,7 +20,7 @@ var (
 
 func main() {
 	builder := lynx.NewBuilder(func(ctx context.Context, app lynx.App) error {
-		app.SetLogger(zap.MustNewLogger(app))
+		app.SetLogger(logger.NewZap(app))
 
 		boot, cleanup, err := wireBootstrap(app)
 		if err != nil {
@@ -37,7 +37,10 @@ func main() {
 		lynx.WithVersion(version),
 		lynx.WithSetFlagsFunc(func(f *pflag.FlagSet) {
 			f.String("config-dir", "./configs", "config file path")
-			f.String("log-level", "info", "log level, default info")
+			// 默认值为空而非 "info"：BindPFlags 会把未显式传入的 flag
+			// 默认值绑进配置，若默认 "info" 会短路配置文件里的
+			// logging.level/log_level（lynx v1.0.0 行为）。
+			f.String("log-level", "", "log level, default info")
 		}),
 		lynx.WithBindConfigFunc(config.NewBindConfigFunc()),
 		lynx.WithStopTimeout(30*time.Second),
