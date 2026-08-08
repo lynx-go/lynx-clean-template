@@ -21,11 +21,11 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3
 	github.com/jackc/pgx/v5 v5.7.6
 	github.com/joho/godotenv v1.5.1
-	github.com/lynx-go/lynx v1.0.0
-	github.com/lynx-go/lynx/contrib/kafka v1.0.0
-	github.com/lynx-go/lynx/contrib/pubsub v1.0.0
-	github.com/lynx-go/lynx/contrib/schedule v1.0.0
-	github.com/lynx-go/lynx/contrib/zap v1.0.0
+	github.com/lynx-go/lynx v1.2.0
+	github.com/lynx-go/lynx/contrib/kafka v1.2.0
+	github.com/lynx-go/lynx/contrib/pubsub v1.2.0
+	github.com/lynx-go/lynx/contrib/schedule v1.2.0
+	github.com/lynx-go/lynx/contrib/zap v1.2.0
 	github.com/lynx-go/x v0.1.0
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/pkg/errors v0.9.1
@@ -142,6 +142,7 @@ require (
 	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.40.0 // indirect
+	golang.org/x/time v0.15.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	google.golang.org/api v0.264.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260803160001-6ac0973c030d // indirect

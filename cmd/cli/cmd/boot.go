@@ -125,8 +125,8 @@ func newFileLogger(app lynx.App) *slog.Logger {
 func runCLI(cmd *cobra.Command, args []string, fn func(ctx context.Context, cc *CLIContext, args *CLIArgs) error, opts ...CLIOption) {
 	buildCLI(cmd, args, fn, opts...).Run()
 }
-func buildCLI(cmd *cobra.Command, args []string, fn func(ctx context.Context, cc *CLIContext, args *CLIArgs) error, opts ...CLIOption) *lynx.Builder {
-	return lynx.NewBuilder(func(ctx context.Context, lx lynx.App) error {
+func buildCLI(cmd *cobra.Command, args []string, fn func(ctx context.Context, cc *CLIContext, args *CLIArgs) error, opts ...CLIOption) *lynx.Runner {
+	return lynx.NewRunner(func(lx lynx.App) error {
 		o := &cliOptions{
 			PreWaitTime:  10 * time.Millisecond,
 			PostWaitTime: 10 * time.Millisecond,

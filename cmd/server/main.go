@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/joho/godotenv"
@@ -11,7 +12,6 @@ import (
 	"github.com/lynx-go/lynx-clean-template/pkg/logger"
 	"github.com/lynx-go/lynx-clean-template/pkg/timeutil"
 	"github.com/spf13/pflag"
-	"time"
 )
 
 var (
@@ -19,7 +19,7 @@ var (
 )
 
 func main() {
-	builder := lynx.NewBuilder(func(ctx context.Context, app lynx.App) error {
+	builder := lynx.NewRunner(func(app lynx.App) error {
 		app.SetLogger(logger.NewZap(app))
 
 		boot, cleanup, err := wireBootstrap(app)
@@ -44,6 +44,8 @@ func main() {
 		}),
 		lynx.WithBindConfigFunc(config.NewBindConfigFunc()),
 		lynx.WithStopTimeout(30*time.Second),
+		// 关停排水：readiness 先失败（LB 摘流），窗口结束后才真正关停
+		lynx.WithDrainTimeout(5*time.Second),
 	)
 	builder.Run()
 }

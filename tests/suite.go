@@ -68,8 +68,8 @@ func RunTestSuite(fn func(ctx context.Context, ts *TestingSuite) error, opts ...
 	buildTestSuite(fn, opts...).Run()
 }
 
-func buildTestSuite(fn func(ctx context.Context, ts *TestingSuite) error, opts ...TestOption) *lynx.Builder {
-	return lynx.NewBuilder(func(ctx context.Context, lx lynx.App) error {
+func buildTestSuite(fn func(ctx context.Context, ts *TestingSuite) error, opts ...TestOption) *lynx.Runner {
+	return lynx.NewRunner(func(lx lynx.App) error {
 		o := &TestOptions{
 			PreWaitTime:  10 * time.Millisecond,
 			PostWaitTime: 10 * time.Millisecond,
