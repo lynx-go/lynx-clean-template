@@ -16,27 +16,25 @@ import (
 
 // Injectors from wire.go:
 
-func wireCLIContext(app lynx.Lynx) (*CLIContext, func(), error) {
+func wireCLIContext(app lynx.App) (*CLIContext, func(), error) {
+	bus := NewAppBus(app)
+	broker := server.NewPubSub(bus)
+	publisher := server.NewPublisher(broker)
+	helloHandler := eventhandler.NewHelloHandler()
+	router := server.NewPubSubRouter(broker, helloHandler)
+	v := NewComponents(router)
+	onStartHooks := NewOnStarts()
+	onStopHooks := NewOnStops()
 	appConfig, err := NewConfiguration(app)
 	if err != nil {
 		return nil, nil, err
 	}
-	binder := server.NewKafkaBinderForCLI(appConfig)
-	broker := server.NewPubSub(binder)
-	publisher := server.NewPublisher(broker)
-	helloHandler := eventhandler.NewHelloHandler()
-	router := server.NewPubSubRouter(broker, helloHandler)
-	v := NewComponents(broker, binder, router)
-	v2 := NewComponentBuilders()
-	componentBuilderSetFunc := NewComponentBuilderSetFunc()
 	dataClients, cleanup, err := clients.NewDataClients(appConfig)
 	if err != nil {
 		return nil, nil, err
 	}
 	usersRepo := bunrepo.NewUsersRepo(dataClients)
-	onStartHooks := NewOnStarts()
-	onStopHooks := NewOnStops()
-	cliContext := NewCLIContext(app, publisher, v, v2, componentBuilderSetFunc, usersRepo, onStartHooks, onStopHooks)
+	cliContext := NewCLIContext(app, publisher, v, onStartHooks, onStopHooks, usersRepo)
 	return cliContext, func() {
 		cleanup()
 	}, nil

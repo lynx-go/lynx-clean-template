@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -19,34 +18,30 @@ var (
 )
 
 func main() {
-
-	o := lynx.NewOptions(
-		lynx.WithName("lynx-api"),
-		lynx.WithVersion(version),
-		lynx.WithSetFlagsFunc(func(f *pflag.FlagSet) {
-			f.String("config-dir", "./configs", "config file path")
-			f.String("log-level", "info", "log level, default info")
-		}),
-		lynx.WithBindConfigFunc(config.NewBindConfigFunc()),
-		lynx.WithCloseTimeout(30*time.Second),
-	)
-
-	app := lynx.New(o, func(ctx context.Context, app lynx.Lynx) error {
+	runner := lynx.NewRunner(func(app lynx.App) error {
 		app.SetLogger(zap.MustNewLogger(app))
 
 		boot, cleanup, err := wireBootstrap(app)
 		if err != nil {
-			log.Fatal(err)
-		}
-		if err := app.Hooks(lynx.OnStop(func(ctx context.Context) error {
-			cleanup()
-			return nil
-		})); err != nil {
 			return err
 		}
-		return boot.Bind(app)
-	})
-	app.Run()
+		app.OnStop(func(ctx context.Context) error {
+			cleanup()
+			return nil
+		})
+		boot.Bind(app)
+		return nil
+	},
+		lynx.WithName("lynx-api"),
+		lynx.WithVersion(version),
+		lynx.WithBindFlagsFunc(func(f *pflag.FlagSet) {
+			f.String("config-dir", "./configs", "config file path")
+			f.String("log-level", "info", "log level, default info")
+		}),
+		lynx.WithBindConfigFunc(config.NewBindConfigFunc()),
+		lynx.WithShutdownTimeout(30*time.Second),
+	)
+	runner.Run()
 }
 
 func init() {

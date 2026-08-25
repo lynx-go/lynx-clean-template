@@ -35,6 +35,10 @@ data:
 
 pubsub:
   kafka:
+    # Notes:
+    # 1) If pubsub.kafka is not configured, events stay in-process via Watermill (monolith mode).
+    # 2) If kafka is configured and mapped_event is set, the logical event is bridged to Kafka (decoupled mode).
+    # 3) topic is the physical Kafka topic; mapped_event is the logical routing key (usually aligned with app TopicName).
     hello:
       brokers:
         - "127.0.0.1:9092"
@@ -44,9 +48,14 @@ pubsub:
         start_offset: -1
         instances: 1
         log_message: true
+        mapped_event: "hello"
       producer:
         acks: 1
         log_message: true
+        batch_size: 100
+        batch_timeout: "200ms"
+        async: true
+        mapped_event: "hello"
 
 file:
   buckets:

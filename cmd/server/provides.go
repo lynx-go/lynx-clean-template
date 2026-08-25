@@ -11,8 +11,8 @@ import (
 	config "github.com/lynx-go/lynx-clean-template/internal/pkg/config"
 	"github.com/lynx-go/lynx-clean-template/pkg/pubsub"
 	"github.com/lynx-go/lynx/boot"
-	"github.com/lynx-go/lynx/contrib/kafka"
 	"github.com/lynx-go/lynx/contrib/schedule"
+	"github.com/lynx-go/lynx/eventbus"
 	"github.com/lynx-go/lynx/server/grpc"
 )
 
@@ -25,66 +25,50 @@ var ProviderSet = wire.NewSet(
 	infra.ProviderSet,
 	domain.ProviderSet,
 
-	server.NewKafkaBinderForServer,
-
 	NewComponents,
-	NewComponentBuilders,
-	NewComponentBuilderSetFunc,
 	NewOnStarts,
 	NewOnStops,
-	NewHealthChecks,
+	NewServiceFactories,
 	NewAppConfig,
+	NewAppBus,
 )
 
-func NewAppConfig(app lynx.Lynx) (*config.AppConfig, error) {
+func NewAppConfig(app lynx.App) (*config.AppConfig, error) {
 	var c config.AppConfig
-	if err := app.Config().Unmarshal(&c, lynx.TagNameJSON); err != nil {
+	if err := config.DecodeLynxConfig(app, &c); err != nil {
 		return nil, err
 	}
 	return &c, nil
 }
 
-func NewHealthChecks(app lynx.Lynx) lynx.HealthCheckFunc {
-	return app.HealthCheckFunc()
+// NewAppBus exposes the application event bus for DI.
+func NewAppBus(app lynx.App) eventbus.Bus {
+	return app.Bus()
 }
 
 func NewComponents(
 	scheduler *schedule.Scheduler,
-	pubSubBroker *pubsub.Broker,
-	pubSubBinder *kafka.Binder,
 	pubSubRouter *pubsub.Router,
 	grpcServer *grpc.Server,
 	grpcGatewayServer *server.GRPCGatewayServer,
-) []lynx.Component {
-	return []lynx.Component{
+) []lynx.Service {
+	return []lynx.Service{
 		scheduler,
-		pubSubBroker,
-		grpcGatewayServer,
 		pubSubRouter,
-		pubSubBinder,
+		grpcGatewayServer,
 		grpcServer,
 	}
 }
 
-func NewOnStarts() lynx.OnStartHooks {
-	hooks := lynx.OnStartHooks{}
-	return hooks
+func NewOnStarts() boot.OnStartHooks {
+	return boot.OnStartHooks{}
 }
 
-func NewOnStops() lynx.OnStopHooks {
-	hooks := lynx.OnStopHooks{}
-	return hooks
+func NewOnStops() boot.OnStopHooks {
+	return boot.OnStopHooks{}
 }
 
-func NewComponentBuilders() []lynx.ComponentBuilder {
-	var builders []lynx.ComponentBuilder
-	return builders
-}
-
-func NewComponentBuilderSetFunc(
-	binder *kafka.Binder,
-) lynx.ComponentBuilderSetFunc {
-	return func() lynx.ComponentBuilderSet {
-		return binder.ConsumerBuilders()
-	}
+// NewServiceFactories provides the (empty) service factory set required by boot.New.
+func NewServiceFactories() []lynx.ServiceFactory {
+	return nil
 }

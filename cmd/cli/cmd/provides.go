@@ -7,10 +7,10 @@ import (
 	"github.com/lynx-go/lynx-clean-template/internal/app"
 	"github.com/lynx-go/lynx-clean-template/internal/domain"
 	"github.com/lynx-go/lynx-clean-template/internal/infra"
-	"github.com/lynx-go/lynx-clean-template/internal/infra/server"
-	"github.com/lynx-go/lynx-clean-template/internal/pkg/config"
+	config "github.com/lynx-go/lynx-clean-template/internal/pkg/config"
 	"github.com/lynx-go/lynx-clean-template/pkg/pubsub"
-	"github.com/lynx-go/lynx/contrib/kafka"
+	"github.com/lynx-go/lynx/boot"
+	"github.com/lynx-go/lynx/eventbus"
 )
 
 //go:generate wire
@@ -20,58 +20,37 @@ var ProviderSet = wire.NewSet(
 	app.ProviderSet,
 	infra.ProviderSet,
 	domain.ProviderSet,
-	server.NewKafkaBinderForCLI,
 	NewComponents,
-	NewComponentBuilders,
-	NewComponentBuilderSetFunc,
 	NewOnStarts,
 	NewOnStops,
-	NewHealthChecks,
 	NewConfiguration,
+	NewAppBus,
 )
 
-func NewConfiguration(app lynx.Lynx) (*config.AppConfig, error) {
+func NewConfiguration(app lynx.App) (*config.AppConfig, error) {
 	var c config.AppConfig
-	if err := app.Config().Unmarshal(&c, lynx.TagNameJSON); err != nil {
+	if err := config.DecodeLynxConfig(app, &c); err != nil {
 		return nil, err
 	}
 	return &c, nil
 }
 
-func NewHealthChecks(app lynx.Lynx) lynx.HealthCheckFunc {
-	return app.HealthCheckFunc()
+func NewAppBus(app lynx.App) eventbus.Bus {
+	return app.Bus()
 }
 
 func NewComponents(
-	broker *pubsub.Broker,
-	binder *kafka.Binder,
 	router *pubsub.Router,
-) []lynx.Component {
-	return []lynx.Component{
-		broker,
-		binder,
+) []lynx.Service {
+	return []lynx.Service{
 		router,
 	}
 }
 
-func NewOnStarts() lynx.OnStartHooks {
-	hooks := lynx.OnStartHooks{}
-	return hooks
+func NewOnStarts() boot.OnStartHooks {
+	return boot.OnStartHooks{}
 }
 
-func NewOnStops() lynx.OnStopHooks {
-	hooks := lynx.OnStopHooks{}
-	return hooks
-}
-
-func NewComponentBuilders() []lynx.ComponentBuilder {
-	builders := []lynx.ComponentBuilder{}
-	return builders
-}
-
-func NewComponentBuilderSetFunc() lynx.ComponentBuilderSetFunc {
-	return func() lynx.ComponentBuilderSet {
-		builders := []lynx.ComponentBuilder{}
-		return builders
-	}
+func NewOnStops() boot.OnStopHooks {
+	return boot.OnStopHooks{}
 }

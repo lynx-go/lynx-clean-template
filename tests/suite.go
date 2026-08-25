@@ -9,11 +9,10 @@ import (
 	"github.com/lynx-go/lynx"
 	"github.com/lynx-go/lynx-clean-template/internal/pkg/config"
 	"github.com/lynx-go/lynx/contrib/zap"
-	"github.com/lynx-go/lynx/pkg/errors"
 )
 
 type TestingSuite struct {
-	App lynx.Lynx
+	App lynx.App
 }
 
 func NewTestingSuite() *TestingSuite {
@@ -47,7 +46,7 @@ func WithPreWaitTime(waitTime time.Duration) TestOption {
 	}
 }
 
-func newFileLogger(app lynx.Lynx) *slog.Logger {
+func newFileLogger(app lynx.App) (*slog.Logger, error) {
 	logLevel := app.Config().GetString("test.log-level")
 	if logLevel == "" {
 		logLevel = "info"
@@ -56,11 +55,15 @@ func newFileLogger(app lynx.Lynx) *slog.Logger {
 	if logFile == "" {
 		logFile = "test.log"
 	}
-	zlogger, err := zap.NewZapLoggerToFile(logLevel, logFile)
-	errors.Fatal(err)
+	zlogger, err := zap.NewZapLogger(logLevel, logFile)
+	if err != nil {
+		return nil, err
+	}
 	slogger, err := zap.NewSLogger(zlogger, logLevel)
-	errors.Fatal(err)
-	return slogger
+	if err != nil {
+		return nil, err
+	}
+	return slogger, nil
 }
 
 // RunTestSuite 初始化并运行测试套件
@@ -68,8 +71,8 @@ func RunTestSuite(fn func(ctx context.Context, ts *TestingSuite) error, opts ...
 	buildTestSuite(fn, opts...).Run()
 }
 
-func buildTestSuite(fn func(ctx context.Context, ts *TestingSuite) error, opts ...TestOption) *lynx.CLI {
-	return lynx.New(newTestOptions(), func(ctx context.Context, lx lynx.Lynx) error {
+func buildTestSuite(fn func(ctx context.Context, ts *TestingSuite) error, opts ...TestOption) *lynx.Runner {
+	return lynx.NewRunner(func(app lynx.App) error {
 		o := &TestOptions{
 			PreWaitTime:  10 * time.Millisecond,
 			PostWaitTime: 10 * time.Millisecond,
@@ -80,25 +83,27 @@ func buildTestSuite(fn func(ctx context.Context, ts *TestingSuite) error, opts .
 		}
 
 		if o.LogToFile {
-			lx.SetLogger(newFileLogger(lx))
+			l, err := newFileLogger(app)
+			if err != nil {
+				return err
+			}
+			app.SetLogger(l)
 		} else {
-			lx.SetLogger(zap.MustNewLogger(lx))
+			app.SetLogger(zap.MustNewLogger(app))
 		}
 
-		ts, cleanup, err := wireTestingSuite(lx)
+		ts, cleanup, err := wireTestingSuite(app)
 		if err != nil {
 			return err
 		}
-		ts.App = lx
+		ts.App = app
 
-		if err := lx.Hooks(lynx.OnStop(func(ctx context.Context) error {
+		app.OnStop(func(ctx context.Context) error {
 			cleanup()
 			return nil
-		})); err != nil {
-			return err
-		}
+		})
 
-		return lx.CLI(func(ctx context.Context) error {
+		app.Command(func(ctx context.Context) error {
 			if o.PreWaitTime > 0 {
 				slog.InfoContext(ctx, fmt.Sprintf("waiting %s for components startup", o.PreWaitTime.String()))
 				time.Sleep(o.PreWaitTime)
@@ -116,12 +121,13 @@ func buildTestSuite(fn func(ctx context.Context, ts *TestingSuite) error, opts .
 
 			return nil
 		})
-	})
+		return nil
+	}, newTestOptions()...)
 }
 
-func newTestOptions() *lynx.Options {
-	return lynx.NewOptions(
+func newTestOptions() []lynx.Option {
+	return []lynx.Option{
 		lynx.WithName("lynx:test"),
 		lynx.WithBindConfigFunc(config.NewBindConfigFunc("./configs", "../configs", "../../configs")),
-	)
+	}
 }
