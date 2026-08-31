@@ -22,13 +22,10 @@ func (r *Router) Name() string {
 
 func (r *Router) Init(app lynx.AppContext) error {
 	r.ctx, r.cancelCtx = context.WithCancel(app.Context())
-	return nil
+	return r.run(app.Context())
 }
 
 func (r *Router) Start(ctx context.Context) error {
-	if err := r.run(ctx); err != nil {
-		return err
-	}
 	<-r.ctx.Done()
 	return nil
 }

@@ -73,6 +73,8 @@ func NewGRPCGatewayServer(
 		corsMiddleware := CORSMiddleware(corsConfig)
 		handler = corsMiddleware(mux)
 	}
+	// request_id 透传/生成，注入日志 ctx（建议作为第一个中间件）
+	handler = lynxhttp.WithRequestID()(handler)
 
 	return &GRPCGatewayServer{lynxhttp.NewServer(handler, lynxhttp.WithAddr(addr), lynxhttp.WithTimeout(timeout))}, nil
 }

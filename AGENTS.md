@@ -21,6 +21,7 @@
 ## Config and Environment Conventions
 - Config schema is proto-defined in `internal/pkg/config/config.proto`; runtime binding is in `internal/pkg/config/bind.go`.
 - Environment override prefix is `LYNX_`; keys map from dotted paths (for example `data.database.source` -> `LYNX_DATA_DATABASE_SOURCE`).
+- NOTE: since lynx v0.8 the `BindConfigFunc` receives a `ConfigSource` (underlying viper not exposed, no env-key replacer); only keys listed in `envBoundKeys` are env-overridable via explicit `BindEnv` (`internal/pkg/config/bind.go`). Config decoding uses `config.UnmarshalConfig` (json-tag based, compatible with proto-generated structs) because lynx removed the `TagNameJSON` unmarshal option.
 - `envBoundKeys` currently includes JWT secrets, DB/Redis credentials, and default file-bucket access keys (`internal/pkg/config/bind.go`); prefer env vars for these.
 - `cmd/server/main.go` loads `.env` opportunistically via `godotenv`, then binds config from `./configs` by default.
 - Use `configs/config.yaml.template` as the baseline and keep secrets in env vars for keys listed in `envBoundKeys` (`internal/pkg/config/bind.go`).

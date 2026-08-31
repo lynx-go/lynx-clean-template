@@ -1,6 +1,8 @@
 package config
 
 import (
+	"strings"
+
 	"github.com/lynx-go/lynx"
 	"github.com/spf13/pflag"
 )
@@ -17,10 +19,8 @@ var envBoundKeys = []string{
 }
 
 // ConfigureViper keeps Lynx file loading behavior and enables env overrides.
-//
-// viper's AutomaticEnv already normalizes dotted keys to upper-snake env names
-// (e.g. data.database.source -> LYNX_DATA_DATABASE_SOURCE), so the env bound
-// keys below are documented for clarity; AutomaticEnv covers them.
+// lynx v0.8+ passes a ConfigSource (viper-backed) instead of *viper.Viper;
+// sensitive keys in envBoundKeys are bound explicitly for reliable overrides.
 func ConfigureViper(f *pflag.FlagSet, c lynx.ConfigSource, extraPaths ...string) error {
 	if err := lynx.DefaultBindConfigFunc(f, c); err != nil {
 		return err
@@ -36,7 +36,19 @@ func ConfigureViper(f *pflag.FlagSet, c lynx.ConfigSource, extraPaths ...string)
 	c.SetEnvPrefix(EnvPrefix)
 	c.AutomaticEnv()
 
+	for _, key := range envBoundKeys {
+		if err := c.BindEnv(key, envName(key)); err != nil {
+			return err
+		}
+	}
+
 	return nil
+}
+
+// envName converts a dotted config path to its environment variable name,
+// e.g. "data.database.source" -> "LYNX_DATA_DATABASE_SOURCE".
+func envName(key string) string {
+	return EnvPrefix + "_" + strings.ToUpper(strings.NewReplacer(".", "_", "-", "_").Replace(key))
 }
 
 func NewBindConfigFunc(extraPaths ...string) lynx.BindConfigFunc {
