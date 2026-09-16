@@ -23,8 +23,8 @@ func wireCLIContext(app lynx.App) (*CLIContext, func(), error) {
 	helloHandler := eventhandler.NewHelloHandler()
 	router := server.NewPubSubRouter(broker, helloHandler)
 	v := NewComponents(router)
-	onStartHooks := NewOnStarts()
-	onStopHooks := NewOnStops()
+	preStartHooks := NewPreStarts()
+	preStopHooks := NewPreStops()
 	appConfig, err := NewConfiguration(app)
 	if err != nil {
 		return nil, nil, err
@@ -34,7 +34,7 @@ func wireCLIContext(app lynx.App) (*CLIContext, func(), error) {
 		return nil, nil, err
 	}
 	usersRepo := bunrepo.NewUsersRepo(dataClients)
-	cliContext := NewCLIContext(app, publisher, v, onStartHooks, onStopHooks, usersRepo)
+	cliContext := NewCLIContext(app, publisher, v, preStartHooks, preStopHooks, usersRepo)
 	return cliContext, func() {
 		cleanup()
 	}, nil

@@ -26,8 +26,10 @@ var ProviderSet = wire.NewSet(
 	domain.ProviderSet,
 
 	NewComponents,
-	NewOnStarts,
-	NewOnStops,
+	NewPreStarts,
+	NewDrainHooks,
+	NewPreStops,
+	NewPostStops,
 	NewServiceFactories,
 	NewAppConfig,
 	NewAppBus,
@@ -60,12 +62,22 @@ func NewComponents(
 	}
 }
 
-func NewOnStarts() boot.OnStartHooks {
-	return boot.OnStartHooks{}
+func NewPreStarts() boot.PreStartHooks {
+	return boot.PreStartHooks{}
 }
 
-func NewOnStops() boot.OnStopHooks {
-	return boot.OnStopHooks{}
+func NewDrainHooks() boot.DrainHooks {
+	return boot.DrainHooks{}
+}
+
+func NewPreStops() boot.PreStopHooks {
+	return boot.PreStopHooks{}
+}
+
+// NewPostStops 提供进程收尾清理钩子集合；Wire injector 返回的 cleanup
+// 由 cmd/server/main.go 直接挂 app.OnPostStop，不经过本集合。
+func NewPostStops() boot.PostStopHooks {
+	return boot.PostStopHooks{}
 }
 
 // NewServiceFactories provides the (empty) service factory set required by boot.New.

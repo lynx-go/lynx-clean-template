@@ -1,8 +1,8 @@
 # Lynx Clean Architecture Template / Lynx Clean 架构模板
 
-一个基于 Lynx（v1.5.2）+ DDD / Clean Architecture 的 Go 服务模板，内置 gRPC、grpc-gateway、定时任务、事件总线（Pub/Sub）与 Wire 依赖注入。
+一个基于 Lynx（v1.11.0）+ DDD / Clean Architecture 的 Go 服务模板，内置 gRPC、grpc-gateway、定时任务、事件总线（Pub/Sub）与 Wire 依赖注入。
 
-A Go service template built with Lynx (v1.5.2) + DDD / Clean Architecture, including gRPC, grpc-gateway, scheduler, an event bus (Pub/Sub), and Wire-based dependency injection.
+A Go service template built with Lynx (v1.11.0) + DDD / Clean Architecture, including gRPC, grpc-gateway, scheduler, an event bus (Pub/Sub), and Wire-based dependency injection.
 
 ## 1) Architecture / 架构说明
 
@@ -29,14 +29,15 @@ runner := lynx.NewRunner(func(app lynx.App) error {
     if err != nil {
         return err
     }
-    app.OnStop(func(ctx context.Context) error { cleanup(); return nil })
-    return boot.Bind(app) // 注册 hooks 与 services
+    app.OnPostStop(cleanup) // Wire cleanup 在所有服务停止后执行
+    boot.Apply(app)         // 注册 hooks 与 services
+    return nil
 }, lynx.WithName("lynx-api"), lynx.WithBindConfigFunc(...))
 runner.Run()
 ```
 
 - 组件实现 `lynx.Service`（含 `Name/Init/Start/Stop`），通过 `app.Register(...)` 托管生命周期。
-- 服务通过 `boot.Bootstrap`（由 Wire 生成）聚合 `OnStart`/`OnStop` hooks 与 `[]lynx.Service`，再调用 `boot.Bind(app)` 统一注册。
+- 服务通过 `boot.Bootstrap`（由 Wire 生成）聚合 `PreStartHooks`/`DrainHooks`/`PreStopHooks`/`PostStopHooks` 与 `[]lynx.Service`，再调用 `boot.Apply(app)` 统一注册。
 - 配置通过 `app.Config()`（`lynx.Config` 接口）读取；事件总线通过 `app.Bus()`（`eventbus.Bus`）获取。
 
 ## 2) Prerequisites / 环境准备
@@ -63,7 +64,7 @@ The server opportunistically loads `.env` on startup (dev convenience).
 推荐做法 / Recommended:
 
 1. 参考 `configs/config.yaml.template`。
-2. 使用 `LYNX_` 前缀环境变量覆盖敏感配置（viper `AutomaticEnv` 会把点号转为下划线，例如 `data.database.source` -> `LYNX_DATA_DATABASE_SOURCE`）。
+2. 使用 `LYNX_` 前缀环境变量覆盖配置：任意点分键都可覆盖（v1.8.0 起框架启用 env key replacer，点号映射为下划线），例如 `data.database.source` -> `LYNX_DATA_DATABASE_SOURCE`；敏感键另经显式 `BindEnv` 兜底（见 `internal/pkg/config/bind.go`）。
 
 示例映射 / Example mapping:
 
@@ -302,7 +303,9 @@ task generate:proto
 
 - `Taskfile.yml` 中个别历史命令描述可能与当前 CLI 示例命令不完全一致；请以 `cmd/cli/cmd/*` 实际实现为准。
 - `docker/local/docker-compose.yml` 提供了 Postgres 与 Redis；Kafka 需按你的环境单独准备（见第 6 节）。
-- 升级到 Lynx v1.5.x 后：`contrib/kafka` 与 `contrib/pubsub` 已移除，发布/订阅统一走核心 `eventbus`；启动方式由旧 `lynx.New` / `lynx.CLI` 模型迁移到 `lynx.NewRunner` + `app.Register` / `app.OnStart` / `app.OnStop` / `app.Command`。
+- Lynx v1.5.x：`contrib/kafka` 与 `contrib/pubsub` 已移除，发布/订阅统一走核心 `eventbus`；启动方式由旧 `lynx.New` / `lynx.CLI` 模型迁移到 `lynx.NewRunner` + `app.Register` / `app.Command`。
+- Lynx v1.10.0：生命周期钩子更名为五阶段 `OnPreStart` / `OnPostStart` / `OnDrain` / `OnPreStop` / `OnPostStop`（Wire cleanup 等资源释放应挂 `app.OnPostStop`）；`boot.New` 参数顺序同步调整，provider 修改后需重新 `task wire`。
+- Lynx v1.11.0：`boot.Bind(app)` 更名为 `boot.Apply(app)`。
 
 ---
 

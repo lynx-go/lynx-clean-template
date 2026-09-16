@@ -27,8 +27,10 @@ import (
 // Injectors from wire.go:
 
 func wireBootstrap(app2 lynx.App) (*boot.Bootstrap, func(), error) {
-	onStartHooks := NewOnStarts()
-	onStopHooks := NewOnStops()
+	preStartHooks := NewPreStarts()
+	drainHooks := NewDrainHooks()
+	preStopHooks := NewPreStops()
+	postStopHooks := NewPostStops()
 	scheduler, err := server.NewScheduler()
 	if err != nil {
 		return nil, nil, err
@@ -77,7 +79,7 @@ func wireBootstrap(app2 lynx.App) (*boot.Bootstrap, func(), error) {
 	}
 	v := NewComponents(scheduler, router, grpcServer, grpcGatewayServer)
 	v2 := NewServiceFactories()
-	bootstrap := boot.New(onStartHooks, onStopHooks, v, v2)
+	bootstrap := boot.New(preStartHooks, drainHooks, preStopHooks, postStopHooks, v, v2)
 	return bootstrap, func() {
 		cleanup()
 	}, nil

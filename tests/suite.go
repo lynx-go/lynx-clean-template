@@ -98,10 +98,8 @@ func buildTestSuite(fn func(ctx context.Context, ts *TestingSuite) error, opts .
 		}
 		ts.App = app
 
-		app.OnStop(func(ctx context.Context) error {
-			cleanup()
-			return nil
-		})
+		// Wire cleanup 在所有服务停止后释放 DI 底层资源（OnPostStop）。
+		app.OnPostStop(cleanup)
 
 		app.Command(func(ctx context.Context) error {
 			if o.PreWaitTime > 0 {

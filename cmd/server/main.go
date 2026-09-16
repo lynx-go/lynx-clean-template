@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -25,11 +24,11 @@ func main() {
 		if err != nil {
 			return err
 		}
-		app.OnStop(func(ctx context.Context) error {
-			cleanup()
-			return nil
-		})
-		boot.Bind(app)
+		// Wire cleanup 释放 DI 底层资源（DB/Redis 连接池等），必须在所有
+		// 服务停止之后执行——挂 OnPostStop（v1.10.0 前挂 OnStop 会在在途
+		// 请求收尾前关掉连接池）。
+		app.OnPostStop(cleanup)
+		boot.Apply(app)
 		return nil
 	},
 		lynx.WithName("lynx-api"),

@@ -21,8 +21,10 @@ var ProviderSet = wire.NewSet(
 	infra.ProviderSet,
 	domain.ProviderSet,
 	NewComponents,
-	NewOnStarts,
-	NewOnStops,
+	NewPreStarts,
+	NewDrainHooks,
+	NewPreStops,
+	NewPostStops,
 	NewConfiguration,
 	NewAppBus,
 )
@@ -47,10 +49,18 @@ func NewComponents(
 	}
 }
 
-func NewOnStarts() boot.OnStartHooks {
-	return boot.OnStartHooks{}
+func NewPreStarts() boot.PreStartHooks {
+	return boot.PreStartHooks{}
 }
 
-func NewOnStops() boot.OnStopHooks {
-	return boot.OnStopHooks{}
+func NewDrainHooks() boot.DrainHooks {
+	return boot.DrainHooks{}
+}
+
+func NewPreStops() boot.PreStopHooks {
+	return boot.PreStopHooks{}
+}
+
+func NewPostStops() boot.PostStopHooks {
+	return boot.PostStopHooks{}
 }

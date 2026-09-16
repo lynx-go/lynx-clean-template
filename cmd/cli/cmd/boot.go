@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/lynx-go/lynx"
-	"github.com/lynx-go/lynx/boot"
 	"github.com/lynx-go/lynx-clean-template/internal/app"
 	"github.com/lynx-go/lynx-clean-template/internal/domain/users/repo"
 	"github.com/lynx-go/lynx-clean-template/internal/pkg/config"
 	"github.com/lynx-go/lynx-clean-template/pkg/pubsub"
+	"github.com/lynx-go/lynx/boot"
 	"github.com/lynx-go/lynx/contrib/zap"
 	"github.com/lynx-go/x/log"
 	"github.com/samber/lo"
@@ -43,16 +43,16 @@ func NewCLIContext(
 	app lynx.App,
 	pubSub pubsub.Publisher,
 	components []lynx.Service,
-	onStarts boot.OnStartHooks,
-	onStops boot.OnStopHooks,
+	preStarts boot.PreStartHooks,
+	preStops boot.PreStopHooks,
 	userRepo repo.UsersRepo,
 ) *CLIContext {
 	return &CLIContext{
 		App:        app,
 		PubSub:     pubSub,
 		Components: components,
-		OnStarts:   onStarts,
-		OnStops:    onStops,
+		PreStarts:  preStarts,
+		PreStops:   preStops,
 		UserRepo:   userRepo,
 	}
 }
@@ -61,9 +61,9 @@ type CLIContext struct {
 	App        lynx.App
 	PubSub     pubsub.Publisher
 	Account    *app.Account
-	Components  []lynx.Service
-	OnStarts   boot.OnStartHooks
-	OnStops    boot.OnStopHooks
+	Components []lynx.Service
+	PreStarts  boot.PreStartHooks
+	PreStops   boot.PreStopHooks
 	UserRepo   repo.UsersRepo
 }
 
@@ -150,14 +150,12 @@ func buildCLI(cmd *cobra.Command, args []string, fn func(ctx context.Context, cc
 		if err != nil {
 			return err
 		}
-		app.OnStop(func(ctx context.Context) error {
-			cleanup()
-			return nil
-		})
+		// Wire cleanup 在所有服务停止后释放 DI 底层资源（OnPostStop）。
+		app.OnPostStop(cleanup)
 
 		app.Register(cc.Components...)
-		app.OnStart(cc.OnStarts...)
-		app.OnStop(cc.OnStops...)
+		app.OnPreStart(cc.PreStarts...)
+		app.OnPreStop(cc.PreStops...)
 
 		app.Command(func(ctx context.Context) error {
 			if o.PreWaitTime > 0 {

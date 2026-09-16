@@ -102,9 +102,16 @@ func TestConfigureViperEnvBinding(t *testing.T) {
 	if err := ConfigureViper(pflag.NewFlagSet("test", pflag.ContinueOnError), c); err != nil {
 		t.Fatal(err)
 	}
+	// envBoundKeys 中的键：显式 BindEnv 覆盖。
 	t.Setenv("LYNX_DATA_DATABASE_SOURCE", "postgres://env:pass@host/db")
 	if got := c.GetString("data.database.source"); got != "postgres://env:pass@host/db" {
 		t.Errorf("env override = %q", got)
+	}
+	// 不在 envBoundKeys 中的键：v1.8.0 SetEnvKeyReplacer + AutomaticEnv
+	// 使任意点分键都能按 LYNX_<DOTS_TO_UNDERSCORES> 覆盖。
+	t.Setenv("LYNX_SERVER_HTTP_ADDR", ":9999")
+	if got := c.GetString("server.http.addr"); got != ":9999" {
+		t.Errorf("env override for unbound key = %q, want %q", got, ":9999")
 	}
 }
 
