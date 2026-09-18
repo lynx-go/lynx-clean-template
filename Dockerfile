@@ -1,4 +1,4 @@
-FROM golang:1.25 AS builder
+FROM golang:1.26 AS builder
 
 # 设置工作目录
 WORKDIR /src
@@ -11,26 +11,22 @@ RUN go env -w GO111MODULE=on && \
     go env -w GOARCH=amd64 && \
     go env -w GOPROXY=https://goproxy.cn,direct
 
-# 安装 Task 工具
-RUN go install github.com/go-task/task/v3/cmd/task@latest
-
 # 复制 go.mod 和 go.sum 文件（利用 Docker 缓存）
 COPY go.mod go.sum ./
-COPY shared/go.mod shared/go.sum ./shared/
 
 # 使用 BuildKit 缓存下载依赖
 RUN --mount=type=cache,target=~/go/pkg/mod \
     --mount=type=cache,target=~/.cache/go-build \
     go mod download
 
-# 复制源代码和 Taskfile
+# 复制源代码
 COPY . .
 
-# 切换到服务目录并使用 BuildKit 缓存构建
-WORKDIR /src
+# 使用 BuildKit 缓存构建（版本元数据经 --build-arg VERSION 注入）
+ARG VERSION=dev
 RUN --mount=type=cache,target=~/go/pkg/mod \
     --mount=type=cache,target=~/.cache/go-build \
-    task build
+    go build -ldflags "-X main.Version=${VERSION}" -o ./bin/ ./cmd/server
 
 # 运行阶段
 FROM debian:13 AS runtime

@@ -13,10 +13,11 @@
 - Domain events are published from app layer (example: `internal/app/account.go` publishes `events.EventAccountCreated`) via `shared.EventPublisher` adapter in `internal/infra/domain_adapters.go`.
 
 ## Dev Workflows (Project-Specific)
-- Use Task as the primary workflow runner (`Taskfile.yml`). Key tasks: `task up`, `task migrate`, `task generate`, `task wire`, `task dev`, `task test`, `task build`, `task build-cli`, `task build-all`.
+- Use mise as the primary workflow runner (`mise.toml`). Key tasks: `mise run up`, `mise run migrate`, `mise run generate`, `mise run wire`, `mise run dev`, `mise run test`, `mise run build`, `mise run build-cli`, `mise run build-all`; tools install with `mise install`.
 - Proto generation is Buf-driven (`buf.yaml`, `buf.gen.yaml`) and writes into `genproto/`; do not hand-edit generated `*.pb.go` files.
-- DI is Wire-driven; after provider changes, regenerate with `task wire` (server + cli + tests).
+- DI is Wire-driven; after provider changes, regenerate with `mise run wire` (server + cli + tests).
 - Local infra comes from `docker/local/docker-compose.yml` (Postgres + Redis + Traefik). Kafka is expected by config but not provided by this compose file.
+- `.env` is auto-loaded by mise for all tasks (`[env] _.file`); one-off overrides of `.env` values need task-specific vars (e.g. `MIGRATE_DSN` for migrations), not same-name env vars.
 
 ## Config and Environment Conventions
 - Config schema is proto-defined in `internal/pkg/config/config.proto`; runtime binding is in `internal/pkg/config/bind.go`.
@@ -35,7 +36,7 @@
 - HTTP error shape for grpc-gateway is customized in `internal/infra/server/errors.go`; keep API errors compatible with that mapping.
 
 ## Known Template Drift / Checks
-- `db/migrations/README.md` still shows a legacy example DSN/user (`skyline`) and `bash` snippets; for this template, prefer `task migrate` with the current env-based Postgres settings from `docker/local/docker-compose.yml`.
+- `db/migrations/README.md` still shows a legacy example DSN/user (`skyline`) and `bash` snippets; for this template, prefer `mise run migrate` with the current env-based Postgres settings from `docker/local/docker-compose.yml`.
 - Some implementation docs still reference `db/migrations/v2_email_verification_codes.sql`; current migrations are sequence-based (`db/migrations/000002_email_verification_codes.up.sql` / `.down.sql`).
 
 ## 对话和文档优先使用中文

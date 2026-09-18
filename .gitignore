@@ -6,6 +6,7 @@
 .env
 config.yaml
 settings.local.json
+mise.local.toml
 
 # Build outputs
 bin/

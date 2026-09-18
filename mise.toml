@@ -1,0 +1,131 @@
+# lynx-clean-template 开发环境与任务（mise-en-place）
+#
+#   mise install      安装 [tools] 钉版工具（go / buf / protoc / protoc-gen-go / migrate）
+#   mise tasks        列出全部任务
+#   mise run <task>   执行任务
+#
+# 任务统一用 sh 执行：Linux 自带，Windows 需 Git Bash 的 sh 在 PATH。
+# [env] 自动加载仓库根 .env（等价原 Taskfile 的 dotenv: ['.env']）。
+
+[env]
+_.file = ".env"
+
+[tools]
+go = "1.26.5"              # go.mod `go 1.26.5`
+buf = "1.65.0"             # 全家族统一（torchwood / messageloop 同版本）
+protoc = "31.1"            # 全家族统一（torchwood 同版本；config.pb.go 已按 31.1 重生成）
+protoc-gen-go = "1.36.11"  # config.pb.go 头注释 protoc-gen-go v1.36.11
+gomigrate = "4.20.1"       # db/migrations 迁移
+
+[task_config]
+shell = "sh -o errexit -c"
+
+[tasks."generate:config"]
+description = "config.proto -> config.pb.go"
+dir = "internal/pkg/config"
+run = "protoc -I. --go_out=. --go_opt=paths=source_relative ./config.proto"
+
+[tasks.up]
+description = "启动本地开发环境"
+dir = "docker/local"
+run = "docker compose up -d"
+
+[tasks.down]
+description = "关闭本地开发环境"
+dir = "docker/local"
+run = "docker compose down"
+
+[tasks."down:clean"]
+description = "关闭本地开发环境并删除数据卷"
+dir = "docker/local"
+run = "docker compose down -v"
+
+[tasks."generate:proto"]
+description = "重新生成 protobuf（buf generate）"
+run = "buf generate"
+
+[tasks."upgrade-deps"]
+description = "更新 lynx 框架与 contrib 依赖并 tidy"
+run = [
+  "go get -u github.com/lynx-go/x",
+  "go get -u github.com/lynx-go/lynx",
+  "go get -u github.com/lynx-go/lynx/contrib/zap",
+  "go get -u github.com/lynx-go/lynx/contrib/pubsub",
+  "go get -u github.com/lynx-go/lynx/contrib/kafka",
+  "go get -u github.com/lynx-go/lynx/contrib/schedule",
+  "go mod tidy",
+]
+
+[tasks.migrate]
+description = "执行数据库迁移（DSN 优先 MIGRATE_DSN，其次 POSTGRES_* 拼接）"
+run = '''
+DSN="${MIGRATE_DSN:-postgres://${POSTGRES_USER:-lynx}:${POSTGRES_PASSWORD:-lynx}@${POSTGRES_HOST:-localhost}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-lynx}?sslmode=disable}"
+migrate -path ./db/migrations -database "$DSN" up
+'''
+
+[tasks."wire-server"]
+description = "重生成 cmd/server/wire_gen.go"
+dir = "cmd/server"
+run = ["go mod tidy", "go run -mod=mod github.com/google/wire/cmd/wire"]
+
+[tasks."wire-cli"]
+description = "重生成 cmd/cli/cmd/wire_gen.go"
+dir = "cmd/cli/cmd"
+run = ["go mod tidy", "go run -mod=mod github.com/google/wire/cmd/wire"]
+
+[tasks."wire-tests"]
+description = "重生成 tests/wire_gen.go"
+dir = "tests"
+run = ["go mod tidy", "go run -mod=mod github.com/google/wire/cmd/wire"]
+
+[tasks.wire]
+description = "依次重生成全部 wire_gen.go"
+run = [
+  { task = "wire-server" },
+  { task = "wire-cli" },
+  { task = "wire-tests" },
+]
+
+[tasks.generate]
+description = "generate:proto + generate:config + wire"
+run = [
+  { task = "generate:proto" },
+  { task = "generate:config" },
+  { task = "wire" },
+]
+
+[tasks.dev]
+description = "启动 server（go run ./cmd/server）"
+run = "go run ./cmd/server"
+
+[tasks.build]
+description = "构建 server 到 ./bin/"
+run = '''
+VERSION="$(git describe --tags --always)"
+go build -ldflags "-X main.Version=$VERSION" -o ./bin/ ./cmd/server
+'''
+
+[tasks."build-cli"]
+description = "构建 CLI 到 ./bin/lynx"
+run = '''
+VERSION="$(git describe --tags --always)"
+go build -ldflags "-X main.Version=$VERSION" -o ./bin/lynx ./cmd/cli
+'''
+
+[tasks."build-all"]
+description = "build + build-cli"
+run = [{ task = "build" }, { task = "build-cli" }]
+
+[tasks.test]
+description = "go test -v ./... -cover"
+run = "go test -v ./... -cover"
+
+[tasks."build-docker"]
+description = "构建并推送 Docker 镜像 lynx:1.0.0-<git>-<ts>"
+run = '''
+GIT_VERSION="$(git describe --tags --always)"
+TIMESTAMP="$(date +%Y%m%d%H%M%S)"
+IMAGE="lynx:1.0.0-${GIT_VERSION}-${TIMESTAMP}"
+docker build --build-arg "VERSION=${GIT_VERSION}" -t "$IMAGE" .
+docker push "$IMAGE"
+'''

@@ -42,22 +42,22 @@ runner.Run()
 
 ## 2) Prerequisites / 环境准备
 
-- Go ≥ 1.26.5（模块 `go` 指令已声明；`GOTOOLCHAIN=auto` 会自动拉取对应工具链）。
+- Go ≥ 1.26.5（模块 `go` 指令已声明；`mise install` 会按 `mise.toml` 装齐对应工具链）。
 - Docker + Docker Compose（用于本地 Postgres / Redis）。
-- Task (`go-task`)。
-- `protoc`、`buf`、`wire`、`migrate`（部分可通过 Task 安装）。
+- [mise](https://mise.jdx.dev/)（`curl https://mise.run | sh`）。
+- `buf` / `protoc` / `protoc-gen-go` / `migrate` 由 `mise install` 按 `mise.toml` 钉版安装，无需手动逐个安装。
 
 ## 3) Quick Start / 快速开始
 
 ### 3.1 Start local infra / 启动本地依赖
 
 ```pwsh
-task up
+mise run up
 ```
 
 ### 3.2 Configure environment / 配置环境变量
 
-项目会在启动时尝试加载 `.env`（开发方便，生产可不依赖该文件）。
+项目会在启动时尝试加载 `.env`（开发方便，生产可不依赖该文件）；mise 任务也会自动加载 `.env`（`[env] _.file`）。
 
 The server opportunistically loads `.env` on startup (dev convenience).
 
@@ -75,13 +75,15 @@ The server opportunistically loads `.env` on startup (dev convenience).
 ### 3.3 Run migrations / 执行数据库迁移
 
 ```pwsh
-task migrate
+mise run migrate
 ```
+
+（一次性覆盖迁移 DSN 用 `MIGRATE_DSN=... mise run migrate`；mise 的 `[env]` 会覆盖同名 shell 变量。）
 
 ### 3.4 Run server / 启动服务
 
 ```pwsh
-task dev
+mise run dev
 ```
 
 默认配置模板端口 / Default template ports:
@@ -92,22 +94,25 @@ task dev
 ## 4) Common Tasks / 常用任务
 
 ```pwsh
-task up
-task down
-task down:clean
-task migrate
-task generate
-task wire
-task test
-task build
-task build-cli
+mise install      # 首次：安装 go / buf / protoc / protoc-gen-go / migrate
+mise run up
+mise run down
+mise run down:clean
+mise run migrate
+mise run generate
+mise run wire
+mise run test
+mise run build
+mise run build-cli
 ```
 
 说明 / Notes:
 
-- `task generate` = `buf generate` + config proto 生成 + Wire 生成。
-- 修改 provider 后请执行 `task wire`（会重新生成 `cmd/server`、`cmd/cli/cmd`、`tests` 下的 `wire_gen.go`）。
+- `mise tasks` 可列出全部任务。
+- `mise run generate` = `buf generate` + config proto 生成 + Wire 生成。
+- 修改 provider 后请执行 `mise run wire`（会重新生成 `cmd/server`、`cmd/cli/cmd`、`tests` 下的 `wire_gen.go`）。
 - `genproto/` 下为生成文件，不要手改（Do not edit generated files manually）。
+- `mise run build-all` = `build` + `build-cli`；`mise run build-docker` 构建并推送镜像。
 
 ## 5) API & Code Generation / API 与代码生成
 
@@ -118,8 +123,8 @@ task build-cli
 重新生成 / regenerate:
 
 ```pwsh
-task generate:proto
-task wire
+mise run generate:proto
+mise run wire
 ```
 
 ## 6) Event Bus / 事件总线
@@ -152,7 +157,7 @@ go run ./cmd/cli print-config
 ## 8) Testing / 测试
 
 ```pwsh
-task test
+mise run test
 ```
 
 测试套件同样基于 `lynx.NewRunner` + `app.Command`，在 `tests` 包中通过 Wire 装配依赖。
@@ -295,16 +300,16 @@ func (s *ModuleService) Create(ctx context.Context /* req */) (/* resp */ any, e
 - 在 server gRPC / gateway 注册新服务后，执行：
 
 ```pwsh
-task wire
-task generate:proto
+mise run wire
+mise run generate:proto
 ```
 
 ## 11) Known Template Notes / 模板注意事项
 
-- `Taskfile.yml` 中个别历史命令描述可能与当前 CLI 示例命令不完全一致；请以 `cmd/cli/cmd/*` 实际实现为准。
+- `mise.toml` 中个别历史命令描述可能与当前 CLI 示例命令不完全一致；请以 `cmd/cli/cmd/*` 实际实现为准。
 - `docker/local/docker-compose.yml` 提供了 Postgres 与 Redis；Kafka 需按你的环境单独准备（见第 6 节）。
 - Lynx v1.5.x：`contrib/kafka` 与 `contrib/pubsub` 已移除，发布/订阅统一走核心 `eventbus`；启动方式由旧 `lynx.New` / `lynx.CLI` 模型迁移到 `lynx.NewRunner` + `app.Register` / `app.Command`。
-- Lynx v1.10.0：生命周期钩子更名为五阶段 `OnPreStart` / `OnPostStart` / `OnDrain` / `OnPreStop` / `OnPostStop`（Wire cleanup 等资源释放应挂 `app.OnPostStop`）；`boot.New` 参数顺序同步调整，provider 修改后需重新 `task wire`。
+- Lynx v1.10.0：生命周期钩子更名为五阶段 `OnPreStart` / `OnPostStart` / `OnDrain` / `OnPreStop` / `OnPostStop`（Wire cleanup 等资源释放应挂 `app.OnPostStop`）；`boot.New` 参数顺序同步调整，provider 修改后需重新 `mise run wire`。
 - Lynx v1.11.0：`boot.Bind(app)` 更名为 `boot.Apply(app)`。
 
 ---
