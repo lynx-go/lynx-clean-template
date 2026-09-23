@@ -85,8 +85,8 @@ require (
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/lynx-go/grpcapi v0.0.0-00010101000000-000000000000
-	github.com/lynx-go/grpcapi/genproto v0.0.0-00010101000000-000000000000
+	github.com/lynx-go/grpcapi v0.1.0
+	github.com/lynx-go/grpcapi/genproto v0.1.0
 	github.com/lynx-go/lynx/contrib/cluster v1.0.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -127,7 +127,3 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260819154853-08b0e4226688 // indirect
 	mellium.im/sasl v0.3.2 // indirect
 )
-
-replace github.com/lynx-go/grpcapi => ../grpcapi
-
-replace github.com/lynx-go/grpcapi/genproto => ../grpcapi/genproto
