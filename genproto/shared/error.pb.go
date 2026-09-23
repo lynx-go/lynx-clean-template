@@ -5,6 +5,7 @@
 // source: shared/error.proto
 
 // buf:lint:ignore PACKAGE_DIRECTORY_MATCH
+// buf:lint:ignore PACKAGE_VERSION_SUFFIX
 
 package sharedpb
 

@@ -4,8 +4,23 @@ version: v2
 deps:
   - buf.build/googleapis/googleapis
   - buf.build/bufbuild/protovalidate
+  # openapiv2 注解（protoc-gen-openapiv2/options/annotations.proto）解析来源。
+  - buf.build/grpc-ecosystem/grpc-gateway
 modules:
+  # 主模块排除 third_party：vendored grpcapi 扩展由下方独立模块持有，
+  # 双注册会产生 symbol already defined 冲突。
   - path: proto
+    excludes:
+      - proto/third_party
+  # vendored grpcapi 扩展（过渡：BSR 发布后切 deps 并删除本目录）。
+  # 拷贝自 grpcapi 仓库 proto/grpcapi/v1/authz.proto，漂移防线 =
+  # internal/infra/server 的 vendored_proto_sync_test（本机双仓在位时字节级
+  # 比对）。lint/breaking 全豁免：治理主权在 grpcapi 仓库。
+  - path: proto/third_party
+    lint:
+      use: []
+    breaking:
+      use: []
 lint:
   use:
     - STANDARD

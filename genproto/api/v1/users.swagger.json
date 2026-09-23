@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "api/v1/users.proto",
+    "title": "buf:lint:ignore PACKAGE_DIRECTORY_MATCH",
     "version": "version not set"
   },
   "tags": [
@@ -16,9 +16,9 @@
     "application/json"
   ],
   "paths": {
-    "/v1/admin/users/{userId}/super-admin": {
+    "/v1/admin/users/{user_id}/super-admin": {
       "delete": {
-        "summary": "RevokeSuperAdmin revokes super admin privilege from the target user.\nRequires the caller to be a super admin. Fails if target is the last super admin.\nbuf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE",
+        "summary": "RevokeSuperAdmin revokes super admin privilege from the target user.\nRequires the caller to be a super admin. Fails if target is the last super admin.\nbuf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE\nbuf:lint:ignore RPC_RESPONSE_STANDARD_NAME",
         "operationId": "UsersService_RevokeSuperAdmin",
         "responses": {
           "200": {
@@ -30,13 +30,13 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/sharedErrorResponse"
             }
           }
         },
         "parameters": [
           {
-            "name": "userId",
+            "name": "user_id",
             "in": "path",
             "required": true,
             "type": "string"
@@ -44,10 +44,11 @@
         ],
         "tags": [
           "UsersService"
-        ]
+        ],
+        "x-access": "permission"
       },
       "post": {
-        "summary": "GrantSuperAdmin grants super admin privilege to the target user.\nRequires the caller to be a super admin.\nbuf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE",
+        "summary": "GrantSuperAdmin grants super admin privilege to the target user.\nRequires the caller to be a super admin.\nbuf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE\nbuf:lint:ignore RPC_RESPONSE_STANDARD_NAME",
         "operationId": "UsersService_GrantSuperAdmin",
         "responses": {
           "200": {
@@ -59,13 +60,13 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/sharedErrorResponse"
             }
           }
         },
         "parameters": [
           {
-            "name": "userId",
+            "name": "user_id",
             "in": "path",
             "required": true,
             "type": "string"
@@ -81,12 +82,13 @@
         ],
         "tags": [
           "UsersService"
-        ]
+        ],
+        "x-access": "permission"
       }
     },
     "/v1/users/-/profile": {
       "patch": {
-        "summary": "UpdateMyProfile updates the authenticated user's profile\nbuf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE",
+        "summary": "UpdateMyProfile updates the authenticated user's profile\nbuf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE\nbuf:lint:ignore RPC_RESPONSE_STANDARD_NAME",
         "operationId": "UsersService_UpdateMyProfile",
         "responses": {
           "200": {
@@ -98,7 +100,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/sharedErrorResponse"
             }
           }
         },
@@ -117,9 +119,9 @@
         ]
       }
     },
-    "/v1/users/{userId}/profile": {
+    "/v1/users/{user_id}/profile": {
       "get": {
-        "summary": "GetUserProfile returns a user's profile by ID\nWhen user_id is \"-\", returns the authenticated user's profile\nbuf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE",
+        "summary": "GetUserProfile returns a user's profile by ID\nWhen user_id is \"-\", returns the authenticated user's profile\nbuf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE\nbuf:lint:ignore RPC_RESPONSE_STANDARD_NAME",
         "operationId": "UsersService_GetUserProfile",
         "responses": {
           "200": {
@@ -131,13 +133,13 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/sharedErrorResponse"
             }
           }
         },
         "parameters": [
           {
-            "name": "userId",
+            "name": "user_id",
             "in": "path",
             "required": true,
             "type": "string"
@@ -154,38 +156,39 @@
       "type": "object",
       "description": "GrantSuperAdminRequest contains the target user ID to grant super admin."
     },
-    "protobufAny": {
-      "type": "object",
-      "properties": {
-        "@type": {
-          "type": "string",
-          "description": "A URL/resource name that uniquely identifies the type of the serialized\nprotocol buffer message. This string must contain at least\none \"/\" character. The last segment of the URL's path must represent\nthe fully qualified name of the type (as in\n`path/google.protobuf.Duration`). The name should be in a canonical form\n(e.g., leading \".\" is not accepted).\n\nIn practice, teams usually precompile into the binary all types that they\nexpect it to use in the context of Any. However, for URLs which use the\nscheme `http`, `https`, or no scheme, one can optionally set up a type\nserver that maps type URLs to message definitions as follows:\n\n* If no scheme is provided, `https` is assumed.\n* An HTTP GET on the URL must yield a [google.protobuf.Type][]\n  value in binary format, or produce an error.\n* Applications are allowed to cache lookup results based on the\n  URL, or have them precompiled into a binary to avoid any\n  lookup. Therefore, binary compatibility needs to be preserved\n  on changes to types. (Use versioned type names to manage\n  breaking changes.)\n\nNote: this functionality is not currently available in the official\nprotobuf release, and it is not used for type URLs beginning with\ntype.googleapis.com. As of May 2023, there are no widely used type server\nimplementations and no plans to implement one.\n\nSchemes other than `http`, `https` (or the empty scheme) might be\nused with implementation specific semantics."
-        }
-      },
-      "additionalProperties": {},
-      "description": "`Any` contains an arbitrary serialized protocol buffer message along with a\nURL that describes the type of the serialized message.\n\nProtobuf library provides support to pack/unpack Any values in the form\nof utility functions or additional generated methods of the Any type.\n\nExample 1: Pack and unpack a message in C++.\n\n    Foo foo = ...;\n    Any any;\n    any.PackFrom(foo);\n    ...\n    if (any.UnpackTo(\u0026foo)) {\n      ...\n    }\n\nExample 2: Pack and unpack a message in Java.\n\n    Foo foo = ...;\n    Any any = Any.pack(foo);\n    ...\n    if (any.is(Foo.class)) {\n      foo = any.unpack(Foo.class);\n    }\n    // or ...\n    if (any.isSameTypeAs(Foo.getDefaultInstance())) {\n      foo = any.unpack(Foo.getDefaultInstance());\n    }\n\n Example 3: Pack and unpack a message in Python.\n\n    foo = Foo(...)\n    any = Any()\n    any.Pack(foo)\n    ...\n    if any.Is(Foo.DESCRIPTOR):\n      any.Unpack(foo)\n      ...\n\n Example 4: Pack and unpack a message in Go\n\n     foo := \u0026pb.Foo{...}\n     any, err := anypb.New(foo)\n     if err != nil {\n       ...\n     }\n     ...\n     foo := \u0026pb.Foo{}\n     if err := any.UnmarshalTo(foo); err != nil {\n       ...\n     }\n\nThe pack methods provided by protobuf library will by default use\n'type.googleapis.com/full.type.name' as the type URL and the unpack\nmethods only use the fully qualified type name after the last '/'\nin the type URL, for example \"foo.bar.com/x/y.z\" will yield type\nname \"y.z\".\n\nJSON\n====\nThe JSON representation of an `Any` value uses the regular\nrepresentation of the deserialized, embedded message, with an\nadditional field `@type` which contains the type URL. Example:\n\n    package google.profile;\n    message Person {\n      string first_name = 1;\n      string last_name = 2;\n    }\n\n    {\n      \"@type\": \"type.googleapis.com/google.profile.Person\",\n      \"firstName\": \u003cstring\u003e,\n      \"lastName\": \u003cstring\u003e\n    }\n\nIf the embedded message type is well-known and has a custom JSON\nrepresentation, that representation will be embedded adding a field\n`value` which holds the custom JSON in addition to the `@type`\nfield. Example (for message [google.protobuf.Duration][]):\n\n    {\n      \"@type\": \"type.googleapis.com/google.protobuf.Duration\",\n      \"value\": \"1.212s\"\n    }"
+    "sharedAppMetadata": {
+      "type": "object"
     },
-    "rpcStatus": {
+    "sharedError": {
       "type": "object",
       "properties": {
         "code": {
-          "type": "integer",
-          "format": "int32"
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
         },
         "message": {
           "type": "string"
         },
+        "params": {
+          "type": "object"
+        },
         "details": {
           "type": "array",
           "items": {
-            "type": "object",
-            "$ref": "#/definitions/protobufAny"
+            "type": "string"
           }
         }
       }
     },
-    "sharedAppMetadata": {
-      "type": "object"
+    "sharedErrorResponse": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/sharedError"
+        }
+      }
     },
     "sharedUserMetadata": {
       "type": "object",
@@ -213,10 +216,10 @@
         "username": {
           "type": "string"
         },
-        "displayName": {
+        "display_name": {
           "type": "string"
         },
-        "avatarUrl": {
+        "avatar_url": {
           "type": "string"
         },
         "phone": {
@@ -233,34 +236,48 @@
           "type": "integer",
           "format": "int32"
         },
-        "createdAt": {
+        "created_at": {
           "type": "string",
           "format": "date-time"
         },
-        "updatedAt": {
+        "updated_at": {
           "type": "string",
           "format": "date-time"
         },
-        "lastSignInAt": {
+        "last_sign_in_at": {
           "type": "string",
           "format": "date-time"
         },
-        "bannedUntil": {
+        "banned_until": {
           "type": "string",
           "format": "date-time"
         },
-        "isSuperAdmin": {
+        "is_super_admin": {
           "type": "boolean"
         },
-        "userMetadata": {
+        "user_metadata": {
           "$ref": "#/definitions/sharedUserMetadata",
           "title": "Metadata fields"
         },
-        "appMetadata": {
+        "app_metadata": {
           "$ref": "#/definitions/sharedAppMetadata"
         }
       },
       "title": "User represents a user profile"
     }
-  }
+  },
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "description": "Format: Bearer \u003cjwt\u003e (user session token)",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "Bearer": []
+    }
+  ],
+  "x-access": "end_user"
 }

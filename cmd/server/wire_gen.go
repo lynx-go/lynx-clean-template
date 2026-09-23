@@ -44,6 +44,10 @@ func wireBootstrap(app2 lynx.App) (*boot.Bootstrap, func(), error) {
 		return nil, nil, err
 	}
 	validator := server.NewAuthValidator(appConfig)
+	policySet, err := server.NewAuthzPolicySet()
+	if err != nil {
+		return nil, nil, err
+	}
 	dataClients, cleanup, err := clients.NewDataClients(appConfig)
 	if err != nil {
 		return nil, nil, err
@@ -67,7 +71,7 @@ func wireBootstrap(app2 lynx.App) (*boot.Bootstrap, func(), error) {
 	fileURLResolver := files.NewURLRenderer(appConfig, repoFiles)
 	appUsers := app.NewUsers(usersRepo, fileURLResolver)
 	usersService := grpc.NewUsersService(appUsers)
-	grpcServer, err := server.NewGRPCServer(app2, appConfig, validator, authService, groupsService, usersService)
+	grpcServer, err := server.NewGRPCServer(app2, appConfig, validator, policySet, authService, groupsService, usersService)
 	if err != nil {
 		cleanup()
 		return nil, nil, err

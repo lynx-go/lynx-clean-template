@@ -1,4 +1,12 @@
 version: v2
+# 输入显式排除 vendored grpcapi 扩展：其 Go 生成代码来自 grpcapi 仓库的
+# genproto 子 module（go.mod replace 引入，单点生成），此处生成会产生第二份
+# 副本并触发 FileDescriptor 重复注册。
+inputs:
+  - directory: .
+    exclude_paths:
+      # 文件级排除（buf 不允许排除模块目录本身）
+      - proto/third_party/grpcapi/v1/authz.proto
 plugins:
   - remote: buf.build/protocolbuffers/go:v1.36.10
     out: genproto
@@ -15,5 +23,14 @@ plugins:
     opt:
       - paths=source_relative
 
+  # 字段名使用 proto 声明（snake_case），与运行时 marshaler（gateway.NewMarshaler
+  # 的 UseProtoNames:true）保持一致。注意：该 remote 插件默认即
+  # json_names_for_fields=true，必须显式置 false 才会输出 snake_case。
+  # disable_default_errors 关闭生成器自带的 rpcStatus 默认错误注入；default
+  # 错误响应（lynx.shared.ErrorResponse）由各服务 proto 文件级
+  # openapiv2_swagger 的 responses.default 声明。
   - remote: buf.build/grpc-ecosystem/openapiv2:v2.27.3
     out: genproto
+    opt:
+      - json_names_for_fields=false
+      - disable_default_errors=true

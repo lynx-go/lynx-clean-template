@@ -119,6 +119,8 @@ mise run build-cli
 - Proto 定义位于 `proto/api/v1/*.proto`。
 - 生成产物位于 `genproto/api/v1/*`。
 - gRPC 实现位于 `internal/api/grpc/*.go`。
+- API 授权策略以 [grpcapi](https://github.com/lynx-go/grpcapi) 注解在 proto 上声明（`grpcapi.v1.service_auth` / `grpcapi.v1.method_auth`），启动期由 `internal/infra/server/policies.go` 收集为 PolicySet 并做 fail-closed 断言（已注册方法缺策略直接启动失败）。新增 RPC 必须携带 `google.api.http` 注解并落入某一访问档位（public / end_user / permission）。
+- HTTP 面的访问档位经 openapiv2 `x-access` 扩展随 swagger 下发，与策略集的一致性由 `internal/infra/server/policies_guard_test.go` 守卫；vendored 扩展定义 `proto/third_party/grpcapi/v1/authz.proto` 与库本体的字节一致性由同目录 `vendored_proto_sync_test.go` 守卫（库经 go.mod `replace ../grpcapi` 本地引入）。
 
 重新生成 / regenerate:
 

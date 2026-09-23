@@ -4,10 +4,14 @@
 // 	protoc        (unknown)
 // source: api/v1/users.proto
 
+// buf:lint:ignore PACKAGE_DIRECTORY_MATCH
+
 package apipb
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
+	_ "github.com/lynx-go/grpcapi/genproto/grpcapi/v1"
 	shared "github.com/lynx-go/lynx-clean-template/genproto/shared"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -377,7 +381,7 @@ var File_api_v1_users_proto protoreflect.FileDescriptor
 
 const file_api_v1_users_proto_rawDesc = "" +
 	"\n" +
-	"\x12api/v1/users.proto\x12\vlynx.api.v1\x1a\x11shared/user.proto\x1a\x1cgoogle/api/annotations.proto\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bbuf/validate/validate.proto\"\xf2\x04\n" +
+	"\x12api/v1/users.proto\x12\vlynx.api.v1\x1a\x11shared/user.proto\x1a\x1cgoogle/api/annotations.proto\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bbuf/validate/validate.proto\x1a\x16grpcapi/v1/authz.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\"\xf2\x04\n" +
 	"\vUserProfile\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1a\n" +
 	"\busername\x18\x02 \x01(\tR\busername\x12!\n" +
@@ -407,12 +411,26 @@ const file_api_v1_users_proto_rawDesc = "" +
 	"\x16GrantSuperAdminRequest\x12\x1f\n" +
 	"\auser_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x06userId\":\n" +
 	"\x17RevokeSuperAdminRequest\x12\x1f\n" +
-	"\auser_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x06userId2\x81\x04\n" +
+	"\auser_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x06userId2\xe9\x04\n" +
 	"\fUsersService\x12s\n" +
 	"\x0fUpdateMyProfile\x12#.lynx.api.v1.UpdateMyProfileRequest\x1a\x18.lynx.api.v1.UserProfile\"!\x82\xd3\xe4\x93\x02\x1b:\x04user2\x13/v1/users/-/profile\x12s\n" +
-	"\x0eGetUserProfile\x12\".lynx.api.v1.GetUserProfileRequest\x1a\x18.lynx.api.v1.UserProfile\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/v1/users/{user_id}/profile\x12\x82\x01\n" +
-	"\x0fGrantSuperAdmin\x12#.lynx.api.v1.GrantSuperAdminRequest\x1a\x18.lynx.api.v1.UserProfile\"0\x82\xd3\xe4\x93\x02*:\x01*\"%/v1/admin/users/{user_id}/super-admin\x12\x81\x01\n" +
-	"\x10RevokeSuperAdmin\x12$.lynx.api.v1.RevokeSuperAdminRequest\x1a\x18.lynx.api.v1.UserProfile\"-\x82\xd3\xe4\x93\x02'*%/v1/admin/users/{user_id}/super-adminB>Z<github.com/lynx-go/lynx-clean-template/genproto/api/v1;apipbb\x06proto3"
+	"\x0eGetUserProfile\x12\".lynx.api.v1.GetUserProfileRequest\x1a\x18.lynx.api.v1.UserProfile\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/v1/users/{user_id}/profile\x12\xb2\x01\n" +
+	"\x0fGrantSuperAdmin\x12#.lynx.api.v1.GrantSuperAdminRequest\x1a\x18.lynx.api.v1.UserProfile\"`\x92A\x1aj\x18\n" +
+	"\bx-access\x12\f\x1a\n" +
+	"permission\xea\xc4\x19\x0f\b\x04\x12\vsuper_admin\x82\xd3\xe4\x93\x02*:\x01*\"%/v1/admin/users/{user_id}/super-admin\x12\xb1\x01\n" +
+	"\x10RevokeSuperAdmin\x12$.lynx.api.v1.RevokeSuperAdminRequest\x1a\x18.lynx.api.v1.UserProfile\"]\x92A\x1aj\x18\n" +
+	"\bx-access\x12\f\x1a\n" +
+	"permission\xea\xc4\x19\x0f\b\x04\x12\vsuper_admin\x82\xd3\xe4\x93\x02'*%/v1/admin/users/{user_id}/super-admin\x1a\x06\xf2\xc4\x19\x02\b\x02B\x80\x02\x92A\xbe\x01RJ\n" +
+	"\adefault\x12?\n" +
+	"\x1dAn unexpected error response.\x12\x1e\n" +
+	"\x1c\x1a\x1a.lynx.shared.ErrorResponseZJ\n" +
+	"H\n" +
+	"\x06Bearer\x12>\b\x02\x12)Format: Bearer <jwt> (user session token)\x1a\rAuthorization \x02b\f\n" +
+	"\n" +
+	"\n" +
+	"\x06Bearer\x12\x00z\x16\n" +
+	"\bx-access\x12\n" +
+	"\x1a\bend_userZ<github.com/lynx-go/lynx-clean-template/genproto/api/v1;apipbb\x06proto3"
 
 var (
 	file_api_v1_users_proto_rawDescOnce sync.Once

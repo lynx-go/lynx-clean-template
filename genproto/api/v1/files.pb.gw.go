@@ -82,7 +82,7 @@ func RegisterFilesServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/skyline.api.v1.FilesService/GetPresignedURL", runtime.WithHTTPPathPattern("/v1/files/presigned-urls"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/lynx.api.v1.FilesService/GetPresignedURL", runtime.WithHTTPPathPattern("/v1/files/presigned-urls"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -140,7 +140,7 @@ func RegisterFilesServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/skyline.api.v1.FilesService/GetPresignedURL", runtime.WithHTTPPathPattern("/v1/files/presigned-urls"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/lynx.api.v1.FilesService/GetPresignedURL", runtime.WithHTTPPathPattern("/v1/files/presigned-urls"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return

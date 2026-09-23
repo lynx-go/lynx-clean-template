@@ -21,12 +21,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	FilesService_GetPresignedURL_FullMethodName = "/skyline.api.v1.FilesService/GetPresignedURL"
+	FilesService_GetPresignedURL_FullMethodName = "/lynx.api.v1.FilesService/GetPresignedURL"
 )
 
 // FilesServiceClient is the client API for FilesService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// FilesService 提供文件上传下载的预签名 URL（当前未注册到 gRPC server；
+// 服务默认档参与策略收集，保证注册后即可被启动断言覆盖）。
 type FilesServiceClient interface {
 	GetPresignedURL(ctx context.Context, in *GetPresignedURLRequest, opts ...grpc.CallOption) (*GetPresignedURLResponse, error)
 }
@@ -52,6 +55,9 @@ func (c *filesServiceClient) GetPresignedURL(ctx context.Context, in *GetPresign
 // FilesServiceServer is the server API for FilesService service.
 // All implementations must embed UnimplementedFilesServiceServer
 // for forward compatibility.
+//
+// FilesService 提供文件上传下载的预签名 URL（当前未注册到 gRPC server；
+// 服务默认档参与策略收集，保证注册后即可被启动断言覆盖）。
 type FilesServiceServer interface {
 	GetPresignedURL(context.Context, *GetPresignedURLRequest) (*GetPresignedURLResponse, error)
 	mustEmbedUnimplementedFilesServiceServer()
@@ -110,7 +116,7 @@ func _FilesService_GetPresignedURL_Handler(srv interface{}, ctx context.Context,
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var FilesService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "skyline.api.v1.FilesService",
+	ServiceName: "lynx.api.v1.FilesService",
 	HandlerType: (*FilesServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

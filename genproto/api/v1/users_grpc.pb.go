@@ -4,6 +4,8 @@
 // - protoc             (unknown)
 // source: api/v1/users.proto
 
+// buf:lint:ignore PACKAGE_DIRECTORY_MATCH
+
 package apipb
 
 import (
@@ -34,18 +36,22 @@ const (
 type UsersServiceClient interface {
 	// UpdateMyProfile updates the authenticated user's profile
 	// buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+	// buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
 	UpdateMyProfile(ctx context.Context, in *UpdateMyProfileRequest, opts ...grpc.CallOption) (*UserProfile, error)
 	// GetUserProfile returns a user's profile by ID
 	// When user_id is "-", returns the authenticated user's profile
 	// buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+	// buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
 	GetUserProfile(ctx context.Context, in *GetUserProfileRequest, opts ...grpc.CallOption) (*UserProfile, error)
 	// GrantSuperAdmin grants super admin privilege to the target user.
 	// Requires the caller to be a super admin.
 	// buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+	// buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
 	GrantSuperAdmin(ctx context.Context, in *GrantSuperAdminRequest, opts ...grpc.CallOption) (*UserProfile, error)
 	// RevokeSuperAdmin revokes super admin privilege from the target user.
 	// Requires the caller to be a super admin. Fails if target is the last super admin.
 	// buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+	// buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
 	RevokeSuperAdmin(ctx context.Context, in *RevokeSuperAdminRequest, opts ...grpc.CallOption) (*UserProfile, error)
 }
 
@@ -106,18 +112,22 @@ func (c *usersServiceClient) RevokeSuperAdmin(ctx context.Context, in *RevokeSup
 type UsersServiceServer interface {
 	// UpdateMyProfile updates the authenticated user's profile
 	// buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+	// buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
 	UpdateMyProfile(context.Context, *UpdateMyProfileRequest) (*UserProfile, error)
 	// GetUserProfile returns a user's profile by ID
 	// When user_id is "-", returns the authenticated user's profile
 	// buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+	// buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
 	GetUserProfile(context.Context, *GetUserProfileRequest) (*UserProfile, error)
 	// GrantSuperAdmin grants super admin privilege to the target user.
 	// Requires the caller to be a super admin.
 	// buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+	// buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
 	GrantSuperAdmin(context.Context, *GrantSuperAdminRequest) (*UserProfile, error)
 	// RevokeSuperAdmin revokes super admin privilege from the target user.
 	// Requires the caller to be a super admin. Fails if target is the last super admin.
 	// buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+	// buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
 	RevokeSuperAdmin(context.Context, *RevokeSuperAdminRequest) (*UserProfile, error)
 	mustEmbedUnimplementedUsersServiceServer()
 }

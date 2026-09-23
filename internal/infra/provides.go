@@ -12,6 +12,7 @@ var ProviderSet = wire.NewSet(
 	server.NewGRPCGatewayServer,
 	server.NewGRPCServer,
 	server.NewAuthValidator,
+	server.NewAuthzPolicySet,
 	server.NewScheduler,
 	clients.NewDataClients,
 

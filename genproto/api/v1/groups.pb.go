@@ -10,6 +10,8 @@ package apipb
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
+	_ "github.com/lynx-go/grpcapi/genproto/grpcapi/v1"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -534,7 +536,7 @@ var File_api_v1_groups_proto protoreflect.FileDescriptor
 
 const file_api_v1_groups_proto_rawDesc = "" +
 	"\n" +
-	"\x13api/v1/groups.proto\x12\vlynx.api.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bbuf/validate/validate.proto\"\xcc\x02\n" +
+	"\x13api/v1/groups.proto\x12\vlynx.api.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bbuf/validate/validate.proto\x1a\x16grpcapi/v1/authz.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\"\xcc\x02\n" +
 	"\x05Group\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12!\n" +
@@ -579,7 +581,7 @@ const file_api_v1_groups_proto_rawDesc = "" +
 	"\f_description\"7\n" +
 	"\x12DeleteGroupRequest\x12!\n" +
 	"\bgroup_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\agroupId\"\x15\n" +
-	"\x13DeleteGroupResponse2\x81\x04\n" +
+	"\x13DeleteGroupResponse2\x89\x04\n" +
 	"\rGroupsService\x12Y\n" +
 	"\vCreateGroup\x12\x1f.lynx.api.v1.CreateGroupRequest\x1a\x12.lynx.api.v1.Group\"\x15\x82\xd3\xe4\x93\x02\x0f:\x01*\"\n" +
 	"/v1/groups\x12[\n" +
@@ -588,7 +590,17 @@ const file_api_v1_groups_proto_rawDesc = "" +
 	"ListGroups\x12\x1e.lynx.api.v1.ListGroupsRequest\x1a\x1f.lynx.api.v1.ListGroupsResponse\"\x12\x82\xd3\xe4\x93\x02\f\x12\n" +
 	"/v1/groups\x12d\n" +
 	"\vUpdateGroup\x12\x1f.lynx.api.v1.UpdateGroupRequest\x1a\x12.lynx.api.v1.Group\" \x82\xd3\xe4\x93\x02\x1a:\x01*2\x15/v1/groups/{group_id}\x12o\n" +
-	"\vDeleteGroup\x12\x1f.lynx.api.v1.DeleteGroupRequest\x1a .lynx.api.v1.DeleteGroupResponse\"\x1d\x82\xd3\xe4\x93\x02\x17*\x15/v1/groups/{group_id}B>Z<github.com/lynx-go/lynx-clean-template/genproto/api/v1;apipbb\x06proto3"
+	"\vDeleteGroup\x12\x1f.lynx.api.v1.DeleteGroupRequest\x1a .lynx.api.v1.DeleteGroupResponse\"\x1d\x82\xd3\xe4\x93\x02\x17*\x15/v1/groups/{group_id}\x1a\x06\xf2\xc4\x19\x02\b\x02B\x80\x02\x92A\xbe\x01RJ\n" +
+	"\adefault\x12?\n" +
+	"\x1dAn unexpected error response.\x12\x1e\n" +
+	"\x1c\x1a\x1a.lynx.shared.ErrorResponseZJ\n" +
+	"H\n" +
+	"\x06Bearer\x12>\b\x02\x12)Format: Bearer <jwt> (user session token)\x1a\rAuthorization \x02b\f\n" +
+	"\n" +
+	"\n" +
+	"\x06Bearer\x12\x00z\x16\n" +
+	"\bx-access\x12\n" +
+	"\x1a\bend_userZ<github.com/lynx-go/lynx-clean-template/genproto/api/v1;apipbb\x06proto3"
 
 var (
 	file_api_v1_groups_proto_rawDescOnce sync.Once

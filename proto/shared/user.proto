@@ -1,10 +1,10 @@
 syntax = "proto3";
 
+// buf:lint:ignore PACKAGE_DIRECTORY_MATCH
+// buf:lint:ignore PACKAGE_VERSION_SUFFIX
 package lynx.shared;
 
 option go_package = "github.com/lynx-go/lynx-clean-template/genproto/shared;sharedpb";
-
-import "google/protobuf/any.proto";
 
 message User {
   string id = 1;

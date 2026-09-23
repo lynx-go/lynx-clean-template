@@ -9,6 +9,8 @@
 package apipb
 
 import (
+	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
+	_ "github.com/lynx-go/grpcapi/genproto/grpcapi/v1"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -172,7 +174,7 @@ var File_api_v1_files_proto protoreflect.FileDescriptor
 
 const file_api_v1_files_proto_rawDesc = "" +
 	"\n" +
-	"\x12api/v1/files.proto\x12\x0eskyline.api.v1\x1a\x1cgoogle/api/annotations.proto\"\xa3\x01\n" +
+	"\x12api/v1/files.proto\x12\vlynx.api.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x16grpcapi/v1/authz.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\"\xa3\x01\n" +
 	"\x16GetPresignedURLRequest\x12\x1a\n" +
 	"\bcategory\x18\x01 \x01(\tR\bcategory\x12\x1b\n" +
 	"\tmime_type\x18\x02 \x01(\tR\bmimeType\x12\x1a\n" +
@@ -184,9 +186,19 @@ const file_api_v1_files_proto_rawDesc = "" +
 	"\tfile_path\x18\x02 \x01(\tR\bfilePath\x12\x1f\n" +
 	"\vexposed_url\x18\x03 \x01(\tR\n" +
 	"exposedUrl\x12\x17\n" +
-	"\afile_id\x18\x04 \x01(\tR\x06fileId2\x95\x01\n" +
-	"\fFilesService\x12\x84\x01\n" +
-	"\x0fGetPresignedURL\x12&.skyline.api.v1.GetPresignedURLRequest\x1a'.skyline.api.v1.GetPresignedURLResponse\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/v1/files/presigned-urlsB>Z<github.com/lynx-go/lynx-clean-template/genproto/api/v1;apipbb\x06proto3"
+	"\afile_id\x18\x04 \x01(\tR\x06fileId2\x96\x01\n" +
+	"\fFilesService\x12~\n" +
+	"\x0fGetPresignedURL\x12#.lynx.api.v1.GetPresignedURLRequest\x1a$.lynx.api.v1.GetPresignedURLResponse\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/v1/files/presigned-urls\x1a\x06\xf2\xc4\x19\x02\b\x02B\x80\x02\x92A\xbe\x01RJ\n" +
+	"\adefault\x12?\n" +
+	"\x1dAn unexpected error response.\x12\x1e\n" +
+	"\x1c\x1a\x1a.lynx.shared.ErrorResponseZJ\n" +
+	"H\n" +
+	"\x06Bearer\x12>\b\x02\x12)Format: Bearer <jwt> (user session token)\x1a\rAuthorization \x02b\f\n" +
+	"\n" +
+	"\n" +
+	"\x06Bearer\x12\x00z\x16\n" +
+	"\bx-access\x12\n" +
+	"\x1a\bend_userZ<github.com/lynx-go/lynx-clean-template/genproto/api/v1;apipbb\x06proto3"
 
 var (
 	file_api_v1_files_proto_rawDescOnce sync.Once
@@ -202,12 +214,12 @@ func file_api_v1_files_proto_rawDescGZIP() []byte {
 
 var file_api_v1_files_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_api_v1_files_proto_goTypes = []any{
-	(*GetPresignedURLRequest)(nil),  // 0: skyline.api.v1.GetPresignedURLRequest
-	(*GetPresignedURLResponse)(nil), // 1: skyline.api.v1.GetPresignedURLResponse
+	(*GetPresignedURLRequest)(nil),  // 0: lynx.api.v1.GetPresignedURLRequest
+	(*GetPresignedURLResponse)(nil), // 1: lynx.api.v1.GetPresignedURLResponse
 }
 var file_api_v1_files_proto_depIdxs = []int32{
-	0, // 0: skyline.api.v1.FilesService.GetPresignedURL:input_type -> skyline.api.v1.GetPresignedURLRequest
-	1, // 1: skyline.api.v1.FilesService.GetPresignedURL:output_type -> skyline.api.v1.GetPresignedURLResponse
+	0, // 0: lynx.api.v1.FilesService.GetPresignedURL:input_type -> lynx.api.v1.GetPresignedURLRequest
+	1, // 1: lynx.api.v1.FilesService.GetPresignedURL:output_type -> lynx.api.v1.GetPresignedURLResponse
 	1, // [1:2] is the sub-list for method output_type
 	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name

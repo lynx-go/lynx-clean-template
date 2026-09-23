@@ -4,6 +4,8 @@
 // - protoc             (unknown)
 // source: api/v1/auth.proto
 
+// buf:lint:ignore PACKAGE_DIRECTORY_MATCH
+
 package apipb
 
 import (
